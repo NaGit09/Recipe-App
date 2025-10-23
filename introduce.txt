@@ -1,0 +1,20 @@
+This is final seminar mobile intern
+1) Create new project with expo go 
+- npx create-expo-app@latest
+2) Run new project
+- npx expo start
+3) reset project 
+- npm run reset-project
+4) Install navigation lib 
+- npm install @react-navigation/native
+- npm install @react-navigation/native-stack
+- npx expo install react-native-screens react-native-safe-area-context
+- npm install @react-navigation/bottom-tabs @react-navigation/drawer
+5) Install UI lib
+- npx expo install react-native-paper react-native-vector-icons
+6) Install state management lib 
+- npm install zustand
+7) Install API - React query lib 
+-npm install axios @tanstack/react-query
+8) Íntall form and validaiton lib
+- npm install react-hook-form yup @hookform/resolvers
