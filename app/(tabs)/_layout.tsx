@@ -4,53 +4,96 @@ import { Tabs } from "expo-router";
 import React from "react";
 
 export default function TabsLayout() {
+  type FontAwesomeName = React.ComponentProps<typeof FontAwesome>["name"];
+  type MaterialCommunityName = React.ComponentProps<
+    typeof MaterialCommunityIcons
+  >["name"];
+
+  type ScreenConfig =
+    | {
+        name: "index" | "search" | "notification" | "profile";
+        title: string;
+        lib: "fa";
+        iconComponent: typeof FontAwesome;
+        icon: FontAwesomeName;
+      }
+    | {
+        name: "recipe";
+        title: string;
+        lib: "mci";
+        iconComponent: typeof MaterialCommunityIcons;
+        icon: MaterialCommunityName;
+      };
+
+  const screens: ScreenConfig[] = [
+    {
+      name: "index",
+      title: "Home",
+      lib: "fa",
+      icon: "home",
+      iconComponent: FontAwesome,
+    },
+    {
+      name: "search",
+      title: "Search",
+      lib: "fa",
+      icon: "search",
+      iconComponent: FontAwesome,
+    },
+    {
+      name: "recipe",
+      title: "Recipe",
+      lib: "mci",
+      icon: "chef-hat",
+      iconComponent: MaterialCommunityIcons,
+    },
+    {
+      name: "notification",
+      title: "Notification",
+      lib: "fa",
+      icon: "bell",
+      iconComponent: FontAwesome,
+    },
+    {
+      name: "profile",
+      title: "Profile",
+      lib: "fa",
+      icon: "user",
+      iconComponent: FontAwesome,
+    },
+  ];
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: "blue" }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome name="home" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: "search",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome name="search" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="recipe"
-        options={{
-          title: "recipe",
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="chef-hat" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="notification"
-        options={{
-          title: "notification",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome name="bell" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "profile",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome name="user" size={24} color={color} />
-          ),
-        }}
-      />
+      {screens.map((screen) => (
+        <Tabs.Screen
+          key={screen.name}
+          name={screen.name}
+          options={{
+            title: screen.title,
+            tabBarIcon: ({ color }) => {
+              if (screen.lib === "fa") {
+                const Icon = FontAwesome;
+                return (
+                  <Icon
+                    name={screen.icon as FontAwesomeName}
+                    size={24}
+                    color={color}
+                  />
+                );
+              } else {
+                const Icon = MaterialCommunityIcons;
+                return (
+                  <Icon
+                    name={screen.icon as MaterialCommunityName}
+                    size={24}
+                    color={color}
+                  />
+                );
+              }
+            },
+          }}
+        />
+      ))}
     </Tabs>
   );
 }
