@@ -1,16 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { LoginReq } from "../types/user.type";
-import { login } from "../services/auth/auth.api";
-import { StorageInstance } from "../utils/storage";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { login, register } from "../services/auth/auth.api";
+import { LoginReq, RegisterReq } from "../types/user.type";
 
 interface AuthState {
   userId: string | null;
   accessToken: string | null;
   refreshToken: string | null;
   setAuth: (userId: string, accessToken: string, refreshToken: string) => void;
-  register: () => boolean;
+  register: (dto: RegisterReq) => Promise<boolean>;
   login: (dto: LoginReq) => Promise<boolean>;
   logout: () => boolean;
 }
@@ -25,7 +24,19 @@ export const useAuthStore = create(
       setAuth: (userId, accessToken, refreshToken) =>
         set({ userId, accessToken, refreshToken }),
 
-      register: () => true,
+      register: async (dto: RegisterReq) => {
+        try {
+          const authInfo = await register(dto);
+          if (!authInfo) {
+            return false;
+          }
+          const { info, accessToken, refreshToken } = authInfo;
+          get().setAuth(info.id, accessToken, refreshToken);
+          return true;
+        } catch (error) {
+          return false;
+        }
+      },
 
       login: async (dto: LoginReq) => {
         try {
@@ -40,10 +51,6 @@ export const useAuthStore = create(
 
           get().setAuth(info.id, accessToken, refreshToken);
 
-          await StorageInstance.setItem("userId", info.id);
-          await StorageInstance.setItem("accessToken", accessToken);
-          await StorageInstance.setItem("refreshToken", refreshToken);
-
           return true;
         } catch (error) {
           return false;
@@ -52,7 +59,6 @@ export const useAuthStore = create(
 
       logout: () => {
         set({ userId: null, accessToken: null, refreshToken: null });
-        StorageInstance.clearAll();
         return true;
       },
     }),

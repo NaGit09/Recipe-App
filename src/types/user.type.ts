@@ -6,6 +6,16 @@ export class LoginReq {
         this.password = password;
     }
 }
+export class RegisterReq {
+    email: string;
+    password: string;
+    username: string;
+    constructor(email: string, password: string, username: string) {
+        this.email = email;
+        this.password = password;
+        this.username = username;
+    }
+}
 export interface AuthInfo {
     fullname: string,
     username: string,

@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/src/stores/auth.store";
-import { LoginReq } from "@/src/types/user.type";
+import { RegisterReq } from "@/src/types/user.type";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -18,45 +18,53 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const Login = () => {
-  const { login } = useAuthStore();
+const Register = () => {
+  const { register } = useAuthStore();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [secure, setSecure] = useState(true);
+  const [secureConfirm, setSecureConfirm] = useState(true);
 
   const onDismissSnackBar = () => setVisible(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      setSnackMessage("Please enter both email and password");
+  const handleRegister = async () => {
+    if (!email || !password || !confirmPassword || !username) {
+      setSnackMessage("Please fill in all fields");
+      setVisible(true);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setSnackMessage("Passwords do not match");
       setVisible(true);
       return;
     }
 
     setLoading(true);
     try {
-      console.log(email + " " + password);
-      const loginReq: LoginReq = {
+      const registerReq: RegisterReq = {
         email: email,
         password: password,
+        username: username,
       };
-      const success = await login(loginReq);
+      const success = await register(registerReq);
       if (success) {
-        setSnackMessage("🎉 Login success!");
+        setSnackMessage("🎉 Account created successfully!");
         setVisible(true);
-
-        setTimeout(() => router.push("/"), 1500);
+        setTimeout(() => router.replace("/"), 1500);
       } else {
-        setSnackMessage("Invalid email or password");
+        setSnackMessage("Registration failed. Please try again.");
         setVisible(true);
       }
     } catch (error) {
       console.error(error);
-      setSnackMessage("Login failed. Please try again later.");
+      setSnackMessage("An error occurred. Please try again later.");
       setVisible(true);
     } finally {
       setLoading(false);
@@ -70,7 +78,17 @@ const Login = () => {
         style={{ flex: 1 }}
       >
         <View style={styles.container}>
-          <Text style={styles.title}>Welcome Back 👋</Text>
+          <Text style={styles.title}>Create Account 🚀</Text>
+
+          <TextInput
+            style={styles.input}
+            mode="outlined"
+            label="Username"
+            placeholder="Enter your username"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+          />
 
           <TextInput
             style={styles.input}
@@ -98,21 +116,38 @@ const Login = () => {
             }
           />
 
+          <TextInput
+            style={styles.input}
+            label="Confirm Password"
+            mode="outlined"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={secureConfirm}
+            right={
+              <TextInput.Icon
+                icon={secureConfirm ? "eye-off" : "eye"}
+                onPress={() => setSecureConfirm(!secureConfirm)}
+              />
+            }
+          />
+
           <Button
             mode="contained"
-            onPress={handleLogin}
+            onPress={handleRegister}
             style={styles.button}
             disabled={loading}
           >
-            {loading ? <ActivityIndicator animating color="#fff" /> : "Login"}
+            {loading ? (
+              <ActivityIndicator animating color="#fff" />
+            ) : (
+              "Register"
+            )}
           </Button>
 
-          <Text style={styles.forgot}>Forgot password?</Text>
-
-          <View style={styles.registerContainer}>
-            <Text>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => router.push("/register")}>
-              <Text style={styles.registerLink}>Sign up</Text>
+          <View style={styles.loginContainer}>
+            <Text>Already have an account? </Text>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={styles.loginLink}>Login</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -153,20 +188,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingVertical: 6,
   },
-  forgot: {
-    textAlign: "center",
-    marginTop: 12,
-    color: "#007bff",
-  },
-  registerContainer: {
+  loginContainer: {
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 20,
   },
-  registerLink: {
+  loginLink: {
     color: "#007bff",
     fontWeight: "bold",
   },
 });
 
-export default Login;
+export default Register;

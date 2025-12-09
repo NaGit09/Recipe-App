@@ -1,11 +1,12 @@
 import axios from "axios";
+import { router } from "expo-router";
 import { ApiResponse } from "../types/api.type";
 import { StorageInstance } from "../utils/storage";
 
 const BASE_URL = process.env.BASE_URL;
 // define axiosInstance reuse for all api
 const axiosInstance = axios.create({
-  baseURL: BASE_URL || 'http://localhost:8000',
+  baseURL: BASE_URL || 'http://localhost:8080/recipe-app/api/v1',
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
@@ -14,8 +15,8 @@ const axiosInstance = axios.create({
 
 // Interceptor grant token if request authentication
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = StorageInstance.getItem('accessToken')
+  async (config) => {
+    const token = await StorageInstance.getItem('accessToken')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -48,7 +49,7 @@ axiosInstance.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           console.warn('Unauthorized! Redirecting to login...')
-          window.location.href = '/login'
+          router.replace('/login')
           break
       }
     }
