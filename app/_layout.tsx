@@ -1,23 +1,35 @@
+import { useAuthStore } from "@/src/stores/auth.store";
+import { StorageInstance } from "@/src/utils/storage";
 import { Stack, useRouter } from "expo-router";
-import React, { useEffect } from "react";
-
-function RouteGuard({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const isAuth = false;
-  useEffect(() => {
-    if (!isAuth) {
-      router.replace("/login");
-    }
-  });
-  return <> {children}</>;
-}
+import React, { useEffect, useState } from "react";
 
 export default function RootLayout() {
+  const { accessToken } = useAuthStore();
+  const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isReady) return;
+    const checkFirstLaunch = async () => {
+      const isFirstLaunch = await StorageInstance.getItem("isFirstLaunch");
+      console.log("isFirstLaunch", isFirstLaunch);
+      if (isFirstLaunch === null) {
+        router.replace("/welcome");
+      } else if (!accessToken) {
+        router.replace("/login");
+      }
+    };
+    checkFirstLaunch();
+  }, [isReady, accessToken]);
+
   return (
-    // <RouteGuard>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    // {/* </RouteGuard> */}
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="login" />
+    </Stack>
   );
 }
