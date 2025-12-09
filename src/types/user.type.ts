@@ -22,7 +22,7 @@ export interface AuthInfo {
     id : string
 }
 export interface auth {
-    info: AuthInfo
+    userId: string,
     accessToken: string
     refreshToken: string
 }

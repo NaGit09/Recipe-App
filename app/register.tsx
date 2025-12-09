@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/src/stores/auth.store";
+import { useAuth } from "@/src/hooks/useAuth";
 import { RegisterReq } from "@/src/types/user.type";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -19,7 +19,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Register = () => {
-  const { register } = useAuthStore();
+  const { register, loading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,12 +27,12 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
-  const [loading, setLoading] = useState(false);
   const [secure, setSecure] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
 
+  // Display toast message 
   const onDismissSnackBar = () => setVisible(false);
-
+  // Handle register
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword || !username) {
       setSnackMessage("Please fill in all fields");
@@ -46,7 +46,6 @@ const Register = () => {
       return;
     }
 
-    setLoading(true);
     try {
       const registerReq: RegisterReq = {
         email: email,
@@ -57,7 +56,7 @@ const Register = () => {
       if (success) {
         setSnackMessage("🎉 Account created successfully!");
         setVisible(true);
-        setTimeout(() => router.replace("/"), 1500);
+        setTimeout(() => router.replace("/login"), 1500);
       } else {
         setSnackMessage("Registration failed. Please try again.");
         setVisible(true);
@@ -66,8 +65,6 @@ const Register = () => {
       console.error(error);
       setSnackMessage("An error occurred. Please try again later.");
       setVisible(true);
-    } finally {
-      setLoading(false);
     }
   };
 

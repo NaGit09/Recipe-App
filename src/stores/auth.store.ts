@@ -8,6 +8,7 @@ interface AuthState {
   userId: string | null;
   accessToken: string | null;
   refreshToken: string | null;
+  isLoading : boolean,
   setAuth: (userId: string, accessToken: string, refreshToken: string) => void;
   register: (dto: RegisterReq) => Promise<boolean>;
   login: (dto: LoginReq) => Promise<boolean>;
@@ -18,6 +19,7 @@ export const useAuthStore = create(
   persist<AuthState>(
     (set, get) => ({
       userId: null,
+      isLoading : false,
       accessToken: null,
       refreshToken: null,
 
@@ -27,11 +29,12 @@ export const useAuthStore = create(
       register: async (dto: RegisterReq) => {
         try {
           const authInfo = await register(dto);
+          set({ isLoading: false });
           if (!authInfo) {
             return false;
           }
-          const { info, accessToken, refreshToken } = authInfo;
-          get().setAuth(info.id, accessToken, refreshToken);
+          const { userId, accessToken, refreshToken } = authInfo;
+          get().setAuth(userId, accessToken, refreshToken);
           return true;
         } catch (error) {
           return false;
@@ -40,17 +43,16 @@ export const useAuthStore = create(
 
       login: async (dto: LoginReq) => {
         try {
+          set({ isLoading: true });
           const authInfo = await login(dto);
-          console.log(authInfo);
-
           if (!authInfo) {
             return false;
           }
 
-          const { info, accessToken, refreshToken } = authInfo;
+          const { userId, accessToken, refreshToken } = authInfo;
 
-          get().setAuth(info.id, accessToken, refreshToken);
-
+          get().setAuth(userId, accessToken, refreshToken);
+          set({ isLoading: false });
           return true;
         } catch (error) {
           return false;

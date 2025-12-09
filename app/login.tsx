@@ -1,5 +1,7 @@
-import { useAuthStore } from "@/src/stores/auth.store";
+import { useAuth } from "@/src/hooks/useAuth";
+
 import { LoginReq } from "@/src/types/user.type";
+import { StorageInstance } from "@/src/utils/storage";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -19,37 +21,40 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Login = () => {
-  const { login } = useAuthStore();
+  const { login } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
-  const [loading, setLoading] = useState(false);
   const [secure, setSecure] = useState(true);
 
+  // Display toast message
   const onDismissSnackBar = () => setVisible(false);
-
+  // Handle login
   const handleLogin = async () => {
+
+    // remove old token
+    await StorageInstance.removeItem('accessToken');
     if (!email || !password) {
       setSnackMessage("Please enter both email and password");
       setVisible(true);
       return;
     }
 
-    setLoading(true);
     try {
-      console.log(email + " " + password);
       const loginReq: LoginReq = {
         email: email,
         password: password,
       };
       const success = await login(loginReq);
+      console.log(success);
+      
       if (success) {
         setSnackMessage("🎉 Login success!");
         setVisible(true);
 
-        setTimeout(() => router.push("/"), 1500);
+        setTimeout(() => router.push("/"), 500);
       } else {
         setSnackMessage("Invalid email or password");
         setVisible(true);
@@ -58,8 +63,6 @@ const Login = () => {
       console.error(error);
       setSnackMessage("Login failed. Please try again later.");
       setVisible(true);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -102,9 +105,8 @@ const Login = () => {
             mode="contained"
             onPress={handleLogin}
             style={styles.button}
-            disabled={loading}
           >
-            {loading ? <ActivityIndicator animating color="#fff" /> : "Login"}
+            Login
           </Button>
 
           <Text style={styles.forgot}>Forgot password?</Text>

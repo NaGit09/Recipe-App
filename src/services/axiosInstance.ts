@@ -13,6 +13,7 @@ const axiosInstance = axios.create({
   },
 })
 
+
 // Interceptor grant token if request authentication
 axiosInstance.interceptors.request.use(
   async (config) => {
@@ -26,19 +27,20 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error)
   }
 )
-//
+
 axiosInstance.interceptors.response.use(
   (response) => {
     const apiResponse = response.data as ApiResponse<any>
 
-    const isSuccess = apiResponse.statusCode >= 200 && apiResponse.statusCode < 300
+    const isSuccess = apiResponse.code >= 200 && apiResponse.code < 300
 
     if (isSuccess) {
       return apiResponse.data
     } else {
       return Promise.reject({
         isApiError: true,
-        code: apiResponse.statusCode,
+        code: apiResponse.code,
+        status: apiResponse.status,
         message: apiResponse.message,
       })
     }
