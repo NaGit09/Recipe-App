@@ -1,15 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { login, register } from "../services/auth/auth.api";
-import { LoginReq, RegisterReq } from "../types/user.type";
+import { login, register } from "../services/api/auth.api";
+import { LoginReq, RegisterReq, UserInfo } from "../types/user.type";
+import { StorageInstance } from "../utils/storage";
 
 interface AuthState {
-  userId: string | null;
-  accessToken: string | null;
-  refreshToken: string | null;
+  user: UserInfo | null;
+  token: string | null;
   isLoading : boolean,
-  setAuth: (userId: string, accessToken: string, refreshToken: string) => void;
+  setAuth: (user: UserInfo, token: string) => void;
   register: (dto: RegisterReq) => Promise<boolean>;
   login: (dto: LoginReq) => Promise<boolean>;
   logout: () => boolean;
@@ -18,24 +18,18 @@ interface AuthState {
 export const useAuthStore = create(
   persist<AuthState>(
     (set, get) => ({
-      userId: null,
+      user: null,
       isLoading : false,
-      accessToken: null,
-      refreshToken: null,
+      token: null,
 
-      setAuth: (userId, accessToken, refreshToken) =>
-        set({ userId, accessToken, refreshToken }),
+      setAuth: (user, token) =>
+        set({ user, token }),
 
       register: async (dto: RegisterReq) => {
         try {
-          const authInfo = await register(dto);
+          const result = await register(dto);
           set({ isLoading: false });
-          if (!authInfo) {
-            return false;
-          }
-          const { userId, accessToken, refreshToken } = authInfo;
-          get().setAuth(userId, accessToken, refreshToken);
-          return true;
+          return result;
         } catch (error) {
           return false;
         }
@@ -49,9 +43,13 @@ export const useAuthStore = create(
             return false;
           }
 
-          const { userId, accessToken, refreshToken } = authInfo;
+          const { token, user } = authInfo;
 
-          get().setAuth(userId, accessToken, refreshToken);
+          // Save token , userinfo to async storage
+          StorageInstance.setItem('token', token);
+          StorageInstance.setItem('user', JSON.stringify(user));
+          
+          get().setAuth(user, token);
           set({ isLoading: false });
           return true;
         } catch (error) {
@@ -60,7 +58,7 @@ export const useAuthStore = create(
       },
 
       logout: () => {
-        set({ userId: null, accessToken: null, refreshToken: null });
+        set({ user: null, token: null });
         return true;
       },
     }),

@@ -21,8 +21,19 @@ export interface AuthInfo {
     username: string,
     id : string
 }
-export interface auth {
-    userId: string,
-    accessToken: string
-    refreshToken: string
+export interface UserInfo {
+    id: string,
+    email: string,
+    username: string,
+    avatar: string,
+    bio: string,
+    role: string,
+    favoriteRecipes : string[],
+    createdAt: string,
+    
+}
+
+export interface UserRes {
+    token: string;
+    user: UserInfo;
 }
