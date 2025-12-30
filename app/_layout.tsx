@@ -27,9 +27,20 @@ export default function RootLayout() {
   }, [isReady, accessToken]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "slide_from_right",
+        contentStyle: { backgroundColor: "#FEF2F2" }, // Consistent background
+      }}
+    >
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="login" />
+      <Stack.Screen
+        name="register"
+        options={{ animation: "slide_from_bottom" }}
+      />
+      {/* Register often looks good sliding up or just right, let's stick to consistent right or maybe bottom for modal feel */}
     </Stack>
   );
 }
