@@ -1,26 +1,9 @@
-export class LoginReq {
-    email: string;
-    password: string;
-    constructor(email: string, password: string) {
-        this.email = email;
-        this.password = password;
-    }
-}
-export class RegisterReq {
-    email: string;
-    password: string;
-    username: string;
-    constructor(email: string, password: string, username: string) {
-        this.email = email;
-        this.password = password;
-        this.username = username;
-    }
-}
 export interface AuthInfo {
     fullname: string,
     username: string,
     id : string
 }
+
 export interface UserInfo {
     id: string,
     email: string,
@@ -36,4 +19,11 @@ export interface UserInfo {
 export interface UserRes {
     token: string;
     user: UserInfo;
+}
+
+export interface UserState {
+    user: UserInfo | null;
+    setUser: (user: UserInfo | null) => void;
+    updateProfile: (user: UserInfo) => Promise<UserInfo | null>;
+    getProfile: () => Promise<UserInfo | null>;
 }

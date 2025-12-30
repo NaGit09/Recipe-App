@@ -1,5 +1,5 @@
 import { useAuth } from "@/src/hooks/useAuth";
-import { RegisterReq } from "@/src/types/user.type";
+import { RegisterReq } from "@/src/types/auth.type";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";

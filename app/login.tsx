@@ -1,5 +1,5 @@
 import { useAuth } from "@/src/hooks/useAuth";
-import { LoginReq } from "@/src/types/user.type";
+import { LoginReq } from "@/src/types/auth.type";
 import { StorageInstance } from "@/src/utils/storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -15,19 +15,17 @@ import { Button, Snackbar, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login , loading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
   const [secure, setSecure] = useState(true);
-  const [loading, setLoading] = useState(false);
 
   const onDismissSnackBar = () => setVisible(false);
 
   const handleLogin = async () => {
-    // remove old token
     await StorageInstance.removeItem("accessToken");
 
     if (!email || !password) {
@@ -36,7 +34,6 @@ const Login = () => {
       return;
     }
 
-    setLoading(true);
     try {
       const loginReq: LoginReq = {
         email: email,
@@ -53,11 +50,8 @@ const Login = () => {
         setVisible(true);
       }
     } catch (error) {
-      console.error(error);
       setSnackMessage("Login failed. Please try again later.");
       setVisible(true);
-    } finally {
-      setLoading(false);
     }
   };
 

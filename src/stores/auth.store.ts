@@ -1,116 +1,111 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { login as loginApi, register as registerApi } from "../services/auth/auth.api";
-import { LoginReq, RegisterReq } from "../types/user.type";
+import {
+  login as loginApi,
+  register as registerApi,
+} from "../services/api/auth.api";
+import { LoginReq, RegisterReq } from "../types/auth.type";
 import { StorageInstance } from "../utils/storage";
+import { AuthState } from "../types/auth.type";
+import { UserInfo } from "../types/user.type";
 
-interface AuthState {
-  userId: string | null;
-  accessToken: string | null;
-  refreshToken: string | null;
-  isLoading : boolean,
-  setAuth: (userId: string, accessToken: string, refreshToken: string) => Promise<void>;
-  register: (dto: RegisterReq) => Promise<boolean>;
-  login: (dto: LoginReq) => Promise<boolean>;
-  logout: () => Promise<boolean>;
-}
-
+// Auth store handle authencation
 export const useAuthStore = create(
   persist<AuthState>(
     (set, get) => ({
-      userId: null,
-      isLoading : false,
-      accessToken: null,
-      refreshToken: null,
+      user: null,
+      token: null,
+      isLoading: false,
 
-      setAuth: async (userId, accessToken, refreshToken) => {
-        set({ userId, accessToken, refreshToken });
-        // Also save token to StorageInstance for axiosInstance to use
-        if (accessToken) {
-          await StorageInstance.setItem("accessToken", accessToken);
+    // Update auth state
+      setAuth: async (user: UserInfo, token: string) => {
+        set({ user, token });
+
+        if (token) {
+          await StorageInstance.setItem("token", token);
         }
       },
-
+    // Handle register
       register: async (dto: RegisterReq) => {
         try {
           set({ isLoading: true });
           const success = await registerApi(dto);
           set({ isLoading: false });
-          
+
           if (!success) {
             return false;
           }
-          
-          // After successful registration, auto-login the user
+
           try {
-            const loginResult = await loginApi({ email: dto.email, password: dto.password });
-            if (loginResult && loginResult.token && loginResult.user) {
-              await get().setAuth(
-                loginResult.user.id,
-                loginResult.token,
-                "" // refreshToken not implemented yet
-              );
+            const loginResult = await loginApi({
+              email: dto.email,
+              password: dto.password,
+            });
+
+            const { user, token } = loginResult;
+
+            if (user && token) {
+              await get().setAuth(user, token);
               return true;
             }
           } catch (loginError) {
-            console.error("Auto-login after registration failed:", loginError);
-            // Registration succeeded but auto-login failed
-            return true; // Still return true since registration was successful
+            return true;
           }
-          
+
           return true;
         } catch (error) {
-          console.error("Registration error:", error);
           set({ isLoading: false });
           return false;
         }
       },
-
+    // Handle login
       login: async (dto: LoginReq) => {
+        await StorageInstance.removeItem("token");
+
         try {
           set({ isLoading: true });
           const authResponse = await loginApi(dto);
-          
-          if (!authResponse || !authResponse.token || !authResponse.user) {
-            console.error("Invalid login response:", authResponse);
+
+          const { user, token } = authResponse;
+
+          if (!user || !token) {
             set({ isLoading: false });
             return false;
           }
 
-          // Map backend response to frontend format
-          const userId = authResponse.user.id;
-          const accessToken = authResponse.token;
-          const refreshToken = ""; // refreshToken not implemented in backend yet
+          // Save token , userinfo to async storage
+          StorageInstance.setItem('token', token);
+          StorageInstance.setItem('user', JSON.stringify(user));
 
-          await get().setAuth(userId, accessToken, refreshToken);
+          get().setAuth(user, token);
           set({ isLoading: false });
-          console.log("✅ Login successful");
           return true;
+
         } catch (error: any) {
-          console.error("Login error:", error);
           if (error.isApiError) {
-            console.error(`Error code: ${error.code}, Message: ${error.message}`);
+            console.error(
+              `Error code: ${error.code}, Message: ${error.message}`
+            );
           }
           set({ isLoading: false });
           return false;
         }
       },
-
+    // Handle logout 
       logout: async () => {
-        set({ userId: null, accessToken: null, refreshToken: null });
-        // Also remove token from StorageInstance
-        await StorageInstance.removeItem("accessToken");
+        set({ user: null, token: null });
+        await StorageInstance.removeItem("token");
         return true;
       },
     }),
+    // Sync token to async storage
     {
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
       onRehydrateStorage: () => (state) => {
-        // Sync token to StorageInstance when app rehydrates (starts up)
-        if (state?.accessToken) {
-          StorageInstance.setItem("accessToken", state.accessToken).catch((err) => {
+        if (state?.token) {
+          StorageInstance.setItem("token", state.token).catch((err) => {
             console.error("Error syncing token on rehydrate:", err);
           });
         }

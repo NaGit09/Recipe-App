@@ -1,12 +1,11 @@
 import { Category } from "@/src/types/categories";
 import axiosInstance from "../axiosInstance";
 
-// Admin api
 export const createCategory = async (dto: Category) => {
     return await axiosInstance.post('/categories', dto);
 }
 
-export const getCategories = async () : Promise<Category[]> => {
+export const getCategories = async (): Promise<Category[]> => {
     return await axiosInstance.get('/categories');
 }
 
