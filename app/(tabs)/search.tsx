@@ -24,7 +24,7 @@ const Search = () => {
   }, []);
 
   useEffect(() => {
-    if (activeCategory === "all") {
+    if (activeCategory === "All") {
       getAllRecipes();
     } else {
       getRecipesByCategoryId(activeCategory);

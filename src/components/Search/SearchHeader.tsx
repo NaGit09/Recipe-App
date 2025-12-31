@@ -3,13 +3,7 @@ import { useSearchStore } from "@/src/stores/search.store";
 import { Category } from "@/src/types/categories";
 import { Feather } from "@expo/vector-icons";
 import React, { useMemo } from "react";
-import {
-  FlatList,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Text, TextInput } from "react-native-paper";
 
 const SearchHeader = () => {
@@ -18,7 +12,11 @@ const SearchHeader = () => {
   const { categories } = useCategoryStore();
 
   const displayCategories = useMemo(() => {
-    return categories;
+    const allCategory: Category = { id: "All", name: "All", status: "Active" };
+    const filteredCategories = categories.filter(
+      (c) => c.name.toLowerCase() !== "all"
+    );
+    return [allCategory, ...filteredCategories];
   }, [categories]);
 
   const renderCategoryItem = ({ item }: { item: Category }) => {
@@ -87,31 +85,23 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingTop: 10,
-    marginBottom: 10,
+    marginBottom: 0,
+    backgroundColor: "#fff",
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#2d2d2d",
-    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
+    display: "none",
   },
   headerSubtitle: {
-    fontSize: 28,
-    fontWeight: "300",
-    color: "#2d2d2d",
-    marginBottom: 24,
-    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
+    display: "none",
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F7F8FA",
+    backgroundColor: "#F3F4F6",
     borderRadius: 16,
     paddingHorizontal: 16,
-    height: 56,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "#EAEAEA",
+    height: 52,
+    marginBottom: 20,
   },
   searchIcon: {
     marginRight: 10,
@@ -120,7 +110,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "transparent",
     fontSize: 16,
-    height: 56,
+    height: 52,
     paddingHorizontal: 0,
   },
   categoriesWrapper: {
@@ -128,34 +118,37 @@ const styles = StyleSheet.create({
   },
   categoriesList: {
     paddingRight: 20,
-    gap: 12,
   },
-  // Default (Inactive) State - mimicking a subtle card
+  // Default (Inactive) State
   categoryCard: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: "#F3F4F6", // Light gray like index header/bg
-    borderRadius: 24,
-    marginRight: 8,
+    backgroundColor: "#fff",
+    borderRadius: 20, // Pill shape
+    marginRight: 10,
     borderWidth: 1,
-    borderColor: "transparent",
+    borderColor: "#F3F4F6",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
-  // Active State - Matching Index.tsx "categoryCard" style exactly
+  // Active State
   categoryCardActive: {
     backgroundColor: "#DC2626",
-    elevation: 2,
+    borderColor: "#DC2626",
     shadowColor: "#DC2626",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.3,
   },
   categoryLabel: {
     fontSize: 14,
-    color: "#6B7280", // Gray text for inactive
+    color: "#4B5563",
     fontWeight: "600",
   },
   categoryLabelActive: {
-    color: "#fff", // White text for active
+    color: "#fff",
+    fontWeight: "700",
   },
 });
 

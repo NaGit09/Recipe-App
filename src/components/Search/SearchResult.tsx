@@ -1,3 +1,4 @@
+import { FadeInView } from "@/src/components/Animated/FadeInView";
 import { useCategoryStore } from "@/src/stores/category.store";
 import { useRecipeStore } from "@/src/stores/recipe.store";
 import { useSearchStore } from "@/src/stores/search.store";
@@ -32,7 +33,7 @@ const SearchResult = ({ ListHeaderComponent }: SearchResultProps) => {
     let result = recipes;
 
     // 1. Filter by category
-    if (activeCategory && activeCategory !== "all") {
+    if (activeCategory && activeCategory !== "All") {
       result = result.filter((r) => r.category?.id === activeCategory);
     }
 
@@ -49,47 +50,49 @@ const SearchResult = ({ ListHeaderComponent }: SearchResultProps) => {
     return result;
   }, [keyword, recipes, activeCategory]);
 
-  const renderRecipeCard = ({ item }: { item: Recipe }) => {
+  const renderRecipeCard = ({
+    item,
+    index,
+  }: {
+    item: Recipe;
+    index: number;
+  }) => {
     return (
-      <TouchableOpacity style={styles.cardContainer} activeOpacity={0.9}>
-        <View style={styles.cardImageContainer}>
-          <Image
-            source={{ uri: item.image }}
-            style={styles.cardImage}
-            contentFit="cover"
-            transition={200}
-          />
-          <View style={styles.cardOverlay}>
-            <View style={styles.ratingBadge}>
-              <Ionicons name="star" size={10} color="#FFD700" />
-              <Text style={styles.ratingText}>4.5</Text>
-            </View>
-            <TouchableOpacity style={styles.favoriteButton}>
-              <Ionicons name="heart-outline" size={16} color="#fff" />
+      <FadeInView delay={index * 100} style={styles.cardContainer}>
+        <TouchableOpacity
+          style={{ flex: 1 }}
+          activeOpacity={0.9}
+          onPress={() => router.push(`/recipe/${item.id}`)}
+        >
+          <View style={styles.cardImageContainer}>
+            <Image
+              source={{ uri: item.image }}
+              style={styles.cardImage}
+              contentFit="cover"
+              transition={200}
+            />
+            <TouchableOpacity style={styles.likeButton}>
+              <Ionicons name="heart-outline" size={20} color="#DC2626" />
             </TouchableOpacity>
           </View>
-        </View>
-        <View style={styles.cardContent}>
-          <Text style={styles.cardTitle} numberOfLines={2}>
-            {item.name}
-          </Text>
-          <View style={styles.cardMeta}>
-            <View style={styles.metaItem}>
-              <Feather name="clock" size={12} color="#888" />
-              <Text style={styles.metaText}>{item.time} min</Text>
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle} numberOfLines={2}>
+              {item.name}
+            </Text>
+            <View style={styles.cardMetaContainer}>
+              <Feather name="clock" size={12} color="#DC2626" />
+              <Text style={styles.cardMetaText}>{item.time} min</Text>
             </View>
-            <Text style={styles.metaText}>•</Text>
-            <Text style={styles.metaText}>{item.category?.name || "Food"}</Text>
           </View>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </FadeInView>
     );
   };
 
   return (
     <FlatList
       data={filteredRecipes}
-      renderItem={renderRecipeCard}
+      renderItem={({ item, index }) => renderRecipeCard({ item, index })}
       keyExtractor={(item) => item.id}
       numColumns={2}
       columnWrapperStyle={styles.columnWrapper}
@@ -125,82 +128,68 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   cardContainer: {
-    width: (width - 55) / 2, // calculate exact width for 2 columns with spacing
+    width: (width - 55) / 2,
     backgroundColor: "#fff",
     borderRadius: 20,
     marginBottom: 0,
+    elevation: 4,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-    overflow: "hidden", // Important for borderRadius
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    overflow: "visible", // Allowed for shadow
   },
   cardImageContainer: {
     width: "100%",
-    height: 180,
+    height: 150,
+    backgroundColor: "#F3F4F6",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: "hidden",
     position: "relative",
   },
   cardImage: {
     width: "100%",
     height: "100%",
   },
-  cardOverlay: {
+  likeButton: {
     position: "absolute",
     top: 10,
-    left: 10,
     right: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  ratingBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.9)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  ratingText: {
-    fontSize: 10,
-    fontWeight: "bold",
-    marginLeft: 4,
-    color: "#333",
-  },
-  favoriteButton: {
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "#fff",
     padding: 6,
     borderRadius: 20,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   cardContent: {
     padding: 12,
+    paddingBottom: 16,
   },
   cardTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#333",
-    marginBottom: 6,
-    lineHeight: 20,
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1F2937",
+    marginBottom: 8,
+    lineHeight: 22,
   },
-  cardMeta: {
+  cardMetaContainer: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#FEF2F2",
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 6,
-  },
-  metaText: {
+  cardMetaText: {
     fontSize: 12,
-    color: "#999",
+    color: "#DC2626",
+    fontWeight: "700",
     marginLeft: 4,
-    fontWeight: "500",
-    marginRight: 4,
   },
   loadingContainer: {
     padding: 40,

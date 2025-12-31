@@ -3,8 +3,10 @@ import { StorageInstance } from "@/src/utils/storage";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 export default function RootLayout() {
-  const { accessToken } = useAuthStore();
+  const { token } = useAuthStore();
   const router = useRouter();
   const [isReady, setIsReady] = useState(false);
 
@@ -19,28 +21,30 @@ export default function RootLayout() {
       console.log("isFirstLaunch", isFirstLaunch);
       if (isFirstLaunch === null) {
         router.replace("/welcome");
-      } else if (!accessToken) {
+      } else if (!token) {
         router.replace("/login");
       }
     };
     checkFirstLaunch();
-  }, [isReady, accessToken]);
+  }, [isReady, token]);
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: "slide_from_right",
-        contentStyle: { backgroundColor: "#FEF2F2" }, // Consistent background
-      }}
-    >
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="login" />
-      <Stack.Screen
-        name="register"
-        options={{ animation: "slide_from_bottom" }}
-      />
-      {/* Register often looks good sliding up or just right, let's stick to consistent right or maybe bottom for modal feel */}
-    </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "slide_from_right",
+          contentStyle: { backgroundColor: "#FEF2F2" }, // Consistent background
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="login" />
+        <Stack.Screen
+          name="register"
+          options={{ animation: "slide_from_bottom" }}
+        />
+        {/* Register often looks good sliding up or just right, let's stick to consistent right or maybe bottom for modal feel */}
+      </Stack>
+    </GestureHandlerRootView>
   );
 }

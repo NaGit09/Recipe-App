@@ -1,6 +1,7 @@
 import { Category } from "./categories";
 import { IngredientItem } from "./ingredient.type";
 import { NutritionItem } from "./nutrition.type";
+import { UserInfo } from "./user.type";
 
 export interface Recipe {
     id: string;
@@ -12,6 +13,7 @@ export interface Recipe {
     category: Category;
     ingredients: IngredientItem[];
     nutritions: NutritionItem[];
+    author?: UserInfo;
 }
 
 export interface RecipeState {
@@ -30,4 +32,5 @@ export interface RecipeState {
     getMyFavoriteRecipes: () => Promise<void>;
     addFavoriteRecipe: (recipeId: string) => Promise<void>;
     removeFavoriteRecipe: (recipeId: string) => Promise<void>;
+    createRecipe: (data: any) => Promise<boolean>;
 }

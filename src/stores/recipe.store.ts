@@ -2,6 +2,7 @@ import { RecipeState } from "@/src/types/recipe.type";
 import { create } from "zustand";
 import {
     addFavoriteRecipe,
+    createRecipe,
     getAllRecipes,
     getMyFavoriteRecipes,
     getMyRecipes,
@@ -92,6 +93,18 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
             set({ favoriteRecipes: favorites, loading: false });
         } catch (error: any) {
             set({ error: error.message, loading: false });
+        }
+    },
+    createRecipe: async (data: any) => {
+        set({ loading: true, error: null });
+        try {
+            await createRecipe(data);
+            await get().getMyRecipes(); // Refresh my recipes
+            set({ loading: false });
+            return true;
+        } catch (error: any) {
+            set({ error: error.message, loading: false });
+            return false;
         }
     },
 }));
