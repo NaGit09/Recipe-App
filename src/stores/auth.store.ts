@@ -5,10 +5,10 @@ import {
   login as loginApi,
   register as registerApi,
 } from "../services/api/auth.api";
-import { LoginReq, RegisterReq } from "../types/auth.type";
-import { StorageInstance } from "../utils/storage";
-import { AuthState } from "../types/auth.type";
+import { ApiError } from "../types/api.type";
+import { AuthState, LoginReq, RegisterReq } from "../types/auth.type";
 import { UserInfo } from "../types/user.type";
+import { StorageInstance } from "../utils/storage";
 
 // Auth store handle authencation
 export const useAuthStore = create(
@@ -18,7 +18,7 @@ export const useAuthStore = create(
       token: null,
       isLoading: false,
 
-    // Update auth state
+      // Update auth state
       setAuth: async (user: UserInfo, token: string) => {
         set({ user, token });
 
@@ -26,7 +26,7 @@ export const useAuthStore = create(
           await StorageInstance.setItem("token", token);
         }
       },
-    // Handle register
+      // Handle register
       register: async (dto: RegisterReq) => {
         try {
           set({ isLoading: true });
@@ -59,43 +59,50 @@ export const useAuthStore = create(
           return false;
         }
       },
-    // Handle login
+      // Handle login
       login: async (dto: LoginReq) => {
         await StorageInstance.removeItem("token");
 
         try {
           set({ isLoading: true });
+          const { email, password } = dto
+          console.log("Login attempt:", email, password)
           const authResponse = await loginApi(dto);
 
           const { user, token } = authResponse;
 
           if (!user || !token) {
+            console.error("Login failed: Missing user or token in response", authResponse);
             set({ isLoading: false });
             return false;
           }
 
-          // Save token , userinfo to async storage
-          StorageInstance.setItem('token', token);
-          StorageInstance.setItem('user', JSON.stringify(user));
+
+          await StorageInstance.setItem('token', token);
+          await StorageInstance.setItem('user', JSON.stringify(user));
 
           get().setAuth(user, token);
           set({ isLoading: false });
           return true;
 
-        } catch (error: any) {
-          if (error.isApiError) {
+        } catch (error) {
+          console.error("Login error caught in store:", error);
+          const apiError = error as ApiError;
+          if (apiError.isApiError) {
+            // ensure we are logging what we think we are logging
             console.error(
-              `Error code: ${error.code}, Message: ${error.message}`
+              `Error code: ${apiError.status}, Message: ${apiError.message}`
             );
           }
           set({ isLoading: false });
           return false;
         }
       },
-    // Handle logout 
+      // Handle logout 
       logout: async () => {
         set({ user: null, token: null });
         await StorageInstance.removeItem("token");
+        await StorageInstance.removeItem("user");
         return true;
       },
     }),

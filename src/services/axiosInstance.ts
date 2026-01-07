@@ -32,16 +32,14 @@ axiosInstance.interceptors.response.use(
   (response) => {
     const apiResponse = response.data as ApiResponse<any>
 
-    const isSuccess = apiResponse.code >= 200 && apiResponse.code < 300
+    const isSuccess = apiResponse.status >= 200 && apiResponse.status < 300
 
     if (isSuccess) {
-      return apiResponse.data
+      return apiResponse.result
     } else {
       return Promise.reject({
         isApiError: true,
-        code: apiResponse.code,
-        status: apiResponse.status,
-        message: apiResponse.message,
+        code: apiResponse.status,
       })
     }
   },

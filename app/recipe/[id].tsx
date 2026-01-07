@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/src/stores/auth.store";
 import { useCartStore } from "@/src/stores/cart.store";
 import { useRecipeStore } from "@/src/stores/recipe.store";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -20,6 +21,9 @@ const { width } = Dimensions.get("window");
 const RecipeDetail = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const [quantities, setQuantities] = React.useState<{ [key: string]: number }>(
+    {}
+  );
   const {
     activeRecipe,
     getRecipeById,
@@ -29,6 +33,7 @@ const RecipeDetail = () => {
     favoriteRecipes,
   } = useRecipeStore();
   const { addToCart } = useCartStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     if (id && typeof id === "string") {
@@ -54,16 +59,40 @@ const RecipeDetail = () => {
     }
   };
 
-  const handleAddToCart = (item: any) => {
-    // Add to cart with full details
-    addToCart({
-      ingredientId: item.ingredient.id,
-      name: item.ingredient.name,
-      quantity: item.quantity,
-      unit: item.ingredient.unit,
-      price: item.ingredient.price || 0,
+  const updateQuantity = (ingredientId: string, change: number) => {
+    setQuantities((prev) => {
+      const current = prev[ingredientId] ?? 0;
+      // Get base quantity from recipe if not in state yet
+      const baseRaw = activeRecipe?.ingredients.find(
+        (i) => i.ingredient.id === ingredientId
+      )?.quantity;
+      const base = baseRaw ?? 0;
+      const startValue = current === 0 ? base : current;
+
+      const newValue = Math.max(1, startValue + change);
+      return { ...prev, [ingredientId]: newValue };
     });
-    Alert.alert("Added", `${item.ingredient.name} added to cart!`);
+  };
+
+  const handleAddAllToCart = async () => {
+    if (!user?.id || !activeRecipe) {
+      Alert.alert("Error", "Please login to add to cart");
+      return;
+    }
+
+    const ingredientsPayload = activeRecipe.ingredients.map((item) => ({
+      id: item.ingredient.id,
+      quantity: quantities[item.ingredient.id] ?? item.quantity,
+    }));
+
+    const req = {
+      recipeId: activeRecipe.id,
+      quantity: 1,
+      ingredients: ingredientsPayload,
+    };
+
+    await addToCart(user.id, req);
+    Alert.alert("Success", "All ingredients added to cart!");
   };
 
   return (
@@ -123,39 +152,57 @@ const RecipeDetail = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
             <View style={styles.ingredientsList}>
-              {activeRecipe.ingredients.map((item, index) => (
-                <View key={index} style={styles.ingredientItem}>
-                  <View style={styles.ingredientIcon}>
-                    <MaterialCommunityIcons
-                      name="food-apple-outline"
-                      size={20}
-                      color="#DC2626"
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
+              {activeRecipe.ingredients.map((item, index) => {
+                const currentQty =
+                  quantities[item.ingredient.id] ?? item.quantity;
+                return (
+                  <View key={index} style={styles.ingredientItem}>
+                    <View style={styles.ingredientIcon}>
+                      <MaterialCommunityIcons
+                        name="food-apple-outline"
+                        size={20}
+                        color="#DC2626"
+                      />
+                    </View>
                     <Text style={styles.ingredientName}>
                       {item.ingredient.name}
                     </Text>
-                    <Text style={styles.ingredientQuantity}>
-                      {item.quantity} {item.ingredient.unit}
-                    </Text>
+                    {/* Quantity Control */}
+                    <View style={styles.quantityContainer}>
+                      <TouchableOpacity
+                        onPress={() => updateQuantity(item.ingredient.id, -1)}
+                        style={styles.qtyBtn}
+                      >
+                        <Feather name="minus" size={14} color="#666" />
+                      </TouchableOpacity>
+                      <Text style={styles.quantityValue}>
+                        {currentQty} {item.ingredient.unit}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => updateQuantity(item.ingredient.id, 1)}
+                        style={styles.qtyBtn}
+                      >
+                        <Feather name="plus" size={14} color="#666" />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <TouchableOpacity
-                    onPress={() => handleAddToCart(item)}
-                    style={styles.addToCartBtn}
-                  >
-                    <Feather name="plus" size={18} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              ))}
+                );
+              })}
             </View>
+            <TouchableOpacity
+              style={styles.addAllButton}
+              onPress={handleAddAllToCart}
+            >
+              <Feather name="shopping-cart" size={20} color="#fff" />
+              <Text style={styles.addAllText}>Add Ingredients to Cart</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Instructions</Text>
             <View style={styles.instructionsContainer}>
               <Text style={styles.instructionText}>
-                {activeRecipe.instructions}
+                {activeRecipe.instructions?.replace(/\\n/g, "\n")}
               </Text>
             </View>
           </View>
@@ -343,35 +390,85 @@ const styles = StyleSheet.create({
   ingredientItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor: "#fff",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+    // Slight shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   ingredientIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     backgroundColor: "#FEF2F2",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 14,
   },
   ingredientName: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
-  },
-  ingredientQuantity: {
-    fontSize: 16,
-    color: "#666",
+    color: "#1F2937",
     fontWeight: "600",
+    marginRight: 8,
   },
-  addToCartBtn: {
+  quantityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    padding: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  qtyBtn: {
+    backgroundColor: "#fff",
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    // Shadow for buttons
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  quantityValue: {
+    fontSize: 14,
+    color: "#374151",
+    fontWeight: "700",
+    marginHorizontal: 12,
+    minWidth: 40,
+    textAlign: "center",
+  },
+  addAllButton: {
     backgroundColor: "#DC2626",
-    padding: 8,
-    borderRadius: 8,
-    marginLeft: 12,
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    shadowColor: "#DC2626",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  addAllText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   instructionsContainer: {
     backgroundColor: "#F9FAFB",
