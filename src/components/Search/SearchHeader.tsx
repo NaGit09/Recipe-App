@@ -5,10 +5,11 @@ import { Feather } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Text, TextInput } from "react-native-paper";
+import CategoryItem from "../Category/CategoryItem";
 
 const SearchHeader = () => {
-  const { keyword, setKeyword, activeCategory, setActiveCategory } =
-    useSearchStore();
+  const { keyword, setKeyword } = useSearchStore();
+
   const { categories } = useCategoryStore();
 
   const displayCategories = useMemo(() => {
@@ -18,23 +19,6 @@ const SearchHeader = () => {
     );
     return [allCategory, ...filteredCategories];
   }, [categories]);
-
-  const renderCategoryItem = ({ item }: { item: Category }) => {
-    const isActive = activeCategory === item.id;
-    return (
-      <TouchableOpacity
-        style={[styles.categoryCard, isActive && styles.categoryCardActive]}
-        onPress={() => setActiveCategory(item.id)}
-        activeOpacity={0.7}
-      >
-        <Text
-          style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}
-        >
-          {item.name}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
 
   return (
     <View style={styles.header}>
@@ -70,7 +54,7 @@ const SearchHeader = () => {
       <View style={styles.categoriesWrapper}>
         <FlatList
           data={displayCategories}
-          renderItem={renderCategoryItem}
+          renderItem={({ item }) => <CategoryItem item={item} />}
           keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -118,37 +102,6 @@ const styles = StyleSheet.create({
   },
   categoriesList: {
     paddingRight: 20,
-  },
-  // Default (Inactive) State
-  categoryCard: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: "#fff",
-    borderRadius: 20, // Pill shape
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-  },
-  // Active State
-  categoryCardActive: {
-    backgroundColor: "#DC2626",
-    borderColor: "#DC2626",
-    shadowColor: "#DC2626",
-    shadowOpacity: 0.3,
-  },
-  categoryLabel: {
-    fontSize: 14,
-    color: "#4B5563",
-    fontWeight: "600",
-  },
-  categoryLabelActive: {
-    color: "#fff",
-    fontWeight: "700",
   },
 });
 

@@ -1,8 +1,13 @@
 import { FadeInView } from "@/src/components/Animated/FadeInView";
+import RecipeItem from "@/src/components/Recipe/RecipeItem";
 import { useAuthStore } from "@/src/stores/auth.store";
 import { useCategoryStore } from "@/src/stores/category.store";
 import { useRecipeStore } from "@/src/stores/recipe.store";
 import { useSearchStore } from "@/src/stores/search.store";
+import {
+  handleCategoryPress,
+  handleSeeAll,
+} from "@/src/utils/helper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -38,20 +43,6 @@ export default function Index() {
     else if (hours < 18) setGreeting("Good Afternoon");
     else setGreeting("Good Evening");
   }, []);
-
-  const handleSeeAll = () => {
-    reset();
-    router.push("/(tabs)/search");
-  };
-
-  const handleCategoryPress = (categoryId: string) => {
-    setActiveCategory(categoryId);
-    router.push("/(tabs)/search");
-  };
-
-  const handleRecipePress = (recipeId: string) => {
-    router.push(`/recipe/${recipeId}`);
-  };
 
   const popularRecipes = recipes.slice(0, 4);
 
@@ -92,13 +83,14 @@ export default function Index() {
             />
           </View>
         </FadeInView>
+
         {/* Categories Section */}
         <FadeInView delay={100} duration={600}>
           <View style={styles.sectionHeader}>
             <Text variant="titleLarge" style={styles.sectionTitle}>
               Categories
             </Text>
-            <TouchableOpacity onPress={handleSeeAll}>
+            <TouchableOpacity onPress={() => handleSeeAll(reset)}>
               <Text style={styles.seeAll}>See all</Text>
             </TouchableOpacity>
           </View>
@@ -112,7 +104,7 @@ export default function Index() {
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.categoryCard}
-                onPress={() => handleCategoryPress(item.id)}
+                onPress={() => handleCategoryPress(item.id, setActiveCategory)}
               >
                 <Text style={styles.categoryLabel}>{item.name}</Text>
               </TouchableOpacity>
@@ -126,7 +118,7 @@ export default function Index() {
             <Text variant="titleLarge" style={styles.sectionTitle}>
               Fresh Recipes
             </Text>
-            <TouchableOpacity onPress={handleSeeAll}>
+            <TouchableOpacity onPress={() => handleSeeAll(reset)}>
               <Text style={styles.seeAll}>See all</Text>
             </TouchableOpacity>
           </View>
@@ -139,54 +131,7 @@ export default function Index() {
         ) : (
           <View style={styles.recipesGrid}>
             {popularRecipes.map((item, index) => (
-              <FadeInView
-                key={item.id}
-                delay={400 + index * 100}
-                style={styles.recipeCardWrapper}
-              >
-                <TouchableOpacity
-                  style={styles.recipeCard}
-                  onPress={() => handleRecipePress(item.id)}
-                  activeOpacity={0.9}
-                >
-                  <View style={styles.recipeImageWrapper}>
-                    {item.image ? (
-                      <Image
-                        source={{ uri: item.image }}
-                        style={styles.recipeImage}
-                      />
-                    ) : (
-                      <View style={styles.recipeImagePlaceholder}>
-                        <MaterialCommunityIcons
-                          name="food-turkey"
-                          size={40}
-                          color="#DC2626"
-                        />
-                      </View>
-                    )}
-                    <TouchableOpacity style={styles.likeButton}>
-                      <MaterialCommunityIcons
-                        name="heart-outline"
-                        size={20}
-                        color="#DC2626"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.recipeInfo}>
-                    <Text style={styles.recipeTitle} numberOfLines={2}>
-                      {item.name}
-                    </Text>
-                    <View style={styles.recipeMetaContainer}>
-                      <MaterialCommunityIcons
-                        name="clock-outline"
-                        size={14}
-                        color="#DC2626"
-                      />
-                      <Text style={styles.recipeMeta}>{item.time} mins</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </FadeInView>
+              <RecipeItem key={item.id} item={item} index={index} />
             ))}
             {popularRecipes.length === 0 && !recipesLoading && (
               <Text
@@ -311,79 +256,5 @@ const styles = StyleSheet.create({
     padding: 40,
     alignItems: "center",
     justifyContent: "center",
-  },
-  recipeCardWrapper: {
-    width: "50%",
-    paddingHorizontal: 8,
-    marginBottom: 16,
-  },
-  recipeCard: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    overflow: "visible", // Allow shadow
-  },
-  recipeImageWrapper: {
-    height: 150,
-    width: "100%",
-    backgroundColor: "#F3F4F6",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    overflow: "hidden",
-    position: "relative",
-  },
-  recipeImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  recipeImagePlaceholder: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  likeButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "#fff",
-    padding: 6,
-    borderRadius: 20,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  recipeInfo: {
-    padding: 12,
-    paddingBottom: 16,
-  },
-  recipeTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#1F2937",
-    marginBottom: 8,
-    lineHeight: 22,
-  },
-  recipeMetaContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FEF2F2",
-    alignSelf: "flex-start",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  recipeMeta: {
-    fontSize: 12,
-    color: "#DC2626",
-    fontWeight: "700",
-    marginLeft: 4,
   },
 });

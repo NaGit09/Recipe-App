@@ -189,33 +189,48 @@ export default function CartDetailScreen() {
         <Text style={styles.sectionTitle}>Ingredients in Cart</Text>
 
         {/* Ingredients List */}
-        {ingredients.map((item, index) => (
-          <View key={index} style={styles.ingredientRow}>
-            <View style={styles.ingredientIcon}>
-              {item.ingredient?.image ? (
-                <Image
-                  source={{ uri: item.ingredient.image }}
-                  style={styles.ingredientImage}
-                />
-              ) : (
-                <MaterialCommunityIcons
-                  name="food-apple"
-                  size={24}
-                  color="#DC2626"
-                />
-              )}
+        {ingredients.map((item, index) => {
+          const totalPrice = (item.ingredient?.price || 0) * item.quantity;
+          return (
+            <View key={index} style={styles.ingredientRow}>
+              <View style={styles.ingredientIcon}>
+                {item.ingredient?.image ? (
+                  <Image
+                    source={{ uri: item.ingredient.image }}
+                    style={styles.ingredientImage}
+                  />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="food-apple"
+                    size={24}
+                    color="#DC2626"
+                  />
+                )}
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.ingredientName}>
+                  {item.ingredient?.name}
+                </Text>
+                <Text style={styles.ingredientPrice}>
+                  ${item.ingredient?.price} / {item.ingredient?.unit}
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end", marginLeft: 12 }}>
+                <Text style={styles.ingredientQuantity}>x{item.quantity}</Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "700",
+                    color: "#DC2626",
+                    marginTop: 4,
+                  }}
+                >
+                  ${totalPrice.toFixed(2)}
+                </Text>
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.ingredientName}>{item.ingredient?.name}</Text>
-              <Text style={styles.ingredientPrice}>
-                Unit: {item.ingredient?.unit}
-              </Text>
-            </View>
-            <View style={{ alignItems: "flex-end", marginLeft: 12 }}>
-              <Text style={styles.ingredientQuantity}>x{item.quantity}</Text>
-            </View>
-          </View>
-        ))}
+          );
+        })}
 
         <Text style={styles.sectionTitle}>Instructions</Text>
         <Surface style={styles.instructionCard} elevation={1}>
@@ -223,6 +238,20 @@ export default function CartDetailScreen() {
             {recipe.instructions?.replace(/\\n/g, "\n")}
           </Text>
         </Surface>
+
+        <View style={styles.totalContainer}>
+          <Text style={styles.totalLabel}>Total Cost</Text>
+          <Text style={styles.totalPrice}>
+            $
+            {ingredients
+              .reduce(
+                (sum, item) =>
+                  sum + (item.ingredient?.price || 0) * item.quantity,
+                0
+              )
+              .toFixed(2)}
+          </Text>
+        </View>
 
         <TouchableOpacity style={styles.removeButton} onPress={handleRemoveAll}>
           <Feather name="trash-2" size={20} color="#DC2626" />
@@ -416,6 +445,30 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
     fontWeight: "700",
+    color: "#DC2626",
+  },
+  totalContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginTop: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  totalLabel: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+  totalPrice: {
+    fontSize: 24,
+    fontWeight: "800",
     color: "#DC2626",
   },
 });

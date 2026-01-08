@@ -1,15 +1,14 @@
+import RecipeItem from "@/src/components/Recipe/RecipeItem";
 import { useRecipeStore } from "@/src/stores/recipe.store";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
   FlatList,
-  Image,
   RefreshControl,
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { ActivityIndicator, FAB, Text } from "react-native-paper";
@@ -25,49 +24,6 @@ export default function RecipeScreen() {
   const onRefresh = async () => {
     await getAllRecipes();
   };
-
-  const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => router.push(`/recipe/${item.id}`)}
-      activeOpacity={0.9}
-    >
-      <Image
-        source={{ uri: item.image || "https://via.placeholder.com/150" }}
-        style={styles.cardImage}
-      />
-      <View style={styles.cardContent}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.name}
-          </Text>
-          <View style={[styles.statusBadge, { backgroundColor: "#DEF7EC" }]}>
-            <Text style={[styles.statusText, { color: "#03543F" }]}>
-              {item.category?.name || "Recipe"}
-            </Text>
-          </View>
-        </View>
-
-        <Text style={styles.cardDescription} numberOfLines={2}>
-          {item.description}
-        </Text>
-
-        <View style={styles.cardFooter}>
-          <View style={styles.metaItem}>
-            <Feather name="clock" size={12} color="#6B7280" />
-            <Text style={styles.metaText}>{item.time} min</Text>
-          </View>
-          <Text style={styles.metaDivider}>•</Text>
-          <View style={styles.metaItem}>
-            <Ionicons name="person-outline" size={12} color="#6B7280" />
-            <Text style={styles.metaText}>
-              {item.author?.username || "Community"}
-            </Text>
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -88,7 +44,7 @@ export default function RecipeScreen() {
       ) : (
         <FlatList
           data={recipes}
-          renderItem={renderItem}
+          renderItem={({item ,index}) => <RecipeItem item={item} index={index} />}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           refreshControl={
