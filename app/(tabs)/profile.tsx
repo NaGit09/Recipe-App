@@ -22,12 +22,26 @@ import {
 
 const { width } = Dimensions.get("window");
 
+type BankCard = {
+  bankName: string;
+  cardNumber: string;
+  ownerName: string;
+};
+
 const ProfileScreen = () => {
   const { user, getProfile, updateProfile } = useUserStore();
   const { logout } = useAuthStore();
+
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<UserInfo>>({});
+
+  // Thẻ ngân hàng mặc định (mock)
+  const [bankCard, setBankCard] = useState<BankCard>({
+    bankName: "Vietcombank",
+    cardNumber: "**** **** **** 1234",
+    ownerName: "Card Holder",
+  });
 
   useEffect(() => {
     fetchProfile();
@@ -39,6 +53,10 @@ const ProfileScreen = () => {
       const userData = await getProfile();
       if (userData) {
         setFormData(userData);
+        setBankCard((prev) => ({
+          ...prev,
+          ownerName: userData.username || prev.ownerName,
+        }));
       }
     } catch (error) {
       console.error("Failed to fetch profile:", error);
@@ -74,6 +92,10 @@ const ProfileScreen = () => {
     ]);
   };
 
+  const handleEditBankCard = () => {
+    Alert.alert("Edit Bank Card", "Feature coming soon");
+  };
+
   if (loading && !user) {
     return (
       <View style={styles.loadingContainer}>
@@ -85,7 +107,8 @@ const ProfileScreen = () => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      {/* Red Header Background */}
+
+      {/* Header */}
       <View style={styles.headerBackground}>
         <View style={styles.headerContent}>
           <Text variant="headlineMedium" style={styles.headerTitle}>
@@ -98,6 +121,7 @@ const ProfileScreen = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Profile Card */}
         <Surface style={styles.profileCard} elevation={4}>
           <View style={styles.avatarContainer}>
             <Avatar.Image
@@ -137,6 +161,7 @@ const ProfileScreen = () => {
           </View>
         </Surface>
 
+        {/* Personal Info */}
         <View style={styles.formSection}>
           <Text style={styles.sectionTitle}>Personal Information</Text>
 
@@ -150,17 +175,17 @@ const ProfileScreen = () => {
             style={styles.input}
             outlineColor="#E5E7EB"
             activeOutlineColor="#DC2626"
-            left={<TextInput.Icon icon="account" color="#9CA3AF" />}
+            left={<TextInput.Icon icon="account" />}
           />
 
           <TextInput
             label="Email"
             value={formData.email}
             mode="outlined"
-            style={styles.input}
             disabled
+            style={styles.input}
             outlineColor="#E5E7EB"
-            left={<TextInput.Icon icon="email" color="#9CA3AF" />}
+            left={<TextInput.Icon icon="email" />}
           />
 
           <TextInput
@@ -175,6 +200,34 @@ const ProfileScreen = () => {
             activeOutlineColor="#DC2626"
           />
 
+          {/* Bank Card */}
+          <Text style={styles.sectionTitle}>Default Bank Card</Text>
+
+          <Surface style={styles.bankCard} elevation={3}>
+            <View style={styles.bankRow}>
+              <MaterialCommunityIcons
+                name="credit-card-outline"
+                size={36}
+                color="#DC2626"
+              />
+
+              <View style={styles.bankInfo}>
+                <Text style={styles.bankName}>{bankCard.bankName}</Text>
+                <Text style={styles.bankNumber}>{bankCard.cardNumber}</Text>
+                <Text style={styles.bankOwner}>{bankCard.ownerName}</Text>
+              </View>
+
+              <Button
+                mode="text"
+                textColor="#DC2626"
+                onPress={handleEditBankCard}
+              >
+                Edit
+              </Button>
+            </View>
+          </Surface>
+
+          {/* Buttons */}
           <View style={styles.buttonContainer}>
             <Button
               mode="contained"
@@ -182,7 +235,6 @@ const ProfileScreen = () => {
               loading={saving}
               disabled={saving}
               style={styles.primaryButton}
-              contentStyle={{ paddingVertical: 6 }}
             >
               Update Profile
             </Button>
@@ -204,40 +256,25 @@ const ProfileScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9FAFB",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  container: { flex: 1, backgroundColor: "#F9FAFB" },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+
   headerBackground: {
     height: 180,
     backgroundColor: "#DC2626",
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     paddingTop: 60,
-    paddingHorizontal: 20,
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 0,
   },
-  headerContent: {
-    alignItems: "center",
-  },
-  headerTitle: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  headerContent: { alignItems: "center" },
+  headerTitle: { color: "#fff", fontWeight: "bold" },
+
   scrollContent: {
-    paddingTop: 120, // Push content down to overlap header
+    paddingTop: 120,
     paddingBottom: 40,
     paddingHorizontal: 20,
   },
+
   profileCard: {
     backgroundColor: "#fff",
     borderRadius: 24,
@@ -245,10 +282,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 24,
   },
-  avatarContainer: {
-    position: "relative",
-    marginBottom: 16,
-  },
+
+  avatarContainer: { marginBottom: 16 },
   editBadge: {
     position: "absolute",
     bottom: 0,
@@ -257,68 +292,44 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
     borderColor: "#fff",
   },
-  username: {
-    fontWeight: "bold",
-    color: "#1F2937",
-    marginBottom: 4,
-  },
-  role: {
-    color: "#6B7280",
-    marginBottom: 20,
-  },
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-    paddingHorizontal: 10,
-  },
-  statItem: {
-    alignItems: "center",
-    flex: 1,
-  },
-  statValue: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1F2937",
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: "#E5E7EB",
-  },
-  formSection: {
-    flex: 1,
-  },
+
+  username: { fontWeight: "bold", color: "#1F2937" },
+  role: { color: "#6B7280", marginBottom: 20 },
+
+  statsRow: { flexDirection: "row", width: "100%" },
+  statItem: { flex: 1, alignItems: "center" },
+  statValue: { fontSize: 18, fontWeight: "bold" },
+  statLabel: { fontSize: 12, color: "#6B7280" },
+  statDivider: { width: 1, backgroundColor: "#E5E7EB" },
+
+  formSection: { flex: 1 },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#1F2937",
-    marginBottom: 16,
-    marginLeft: 4,
+    marginVertical: 16,
   },
-  input: {
+
+  input: { backgroundColor: "#fff", marginBottom: 16 },
+
+  bankCard: {
     backgroundColor: "#fff",
-    marginBottom: 16,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
   },
-  buttonContainer: {
-    marginTop: 10,
-    gap: 12,
-  },
-  primaryButton: {
-    backgroundColor: "#DC2626",
-    borderRadius: 12,
-  },
+  bankRow: { flexDirection: "row", alignItems: "center" },
+  bankInfo: { flex: 1, marginLeft: 12 },
+  bankName: { fontSize: 16, fontWeight: "bold" },
+  bankNumber: { color: "#6B7280" },
+  bankOwner: { fontSize: 12, color: "#9CA3AF" },
+
+  buttonContainer: { gap: 12 },
+  primaryButton: { backgroundColor: "#DC2626", borderRadius: 12 },
   logoutButton: {
     borderRadius: 12,
     borderColor: "#FECACA",
