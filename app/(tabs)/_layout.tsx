@@ -63,7 +63,7 @@ export default function TabsLayout() {
     },
   ];
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: "blue" }}>
+    <Tabs screenOptions={{ tabBarActiveTintColor: "blue", headerShown: false }}>
       {screens.map((screen) => (
         <Tabs.Screen
           key={screen.name}

@@ -1,4 +1,6 @@
-import { LoginReq, RegisterReq, UserRes } from "@/src/types/user.type";
+import { LoginReq, RegisterReq } from "@/src/types/auth.type";
+import { UserRes } from "@/src/types/user.type";
+
 import axiosInstance from "../axiosInstance"
 
 export const login = (dto : LoginReq) : Promise<UserRes> => {

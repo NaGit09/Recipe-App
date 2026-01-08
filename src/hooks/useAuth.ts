@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuthStore } from "../stores/auth.store";
-import { LoginReq, RegisterReq } from "../types/user.type";
+import { LoginReq, RegisterReq } from "../types/auth.type";
 
 export const useAuth = () => {
     const { login: loginStore, register: registerStore } = useAuthStore();
@@ -10,7 +10,6 @@ export const useAuth = () => {
         setLoading(true);
         try {
             const result = await loginStore(dto);
-            
             return result;
         } catch (error) {
             console.error("Login error:", error);

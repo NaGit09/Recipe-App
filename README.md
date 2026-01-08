@@ -1,51 +1,60 @@
-# Welcome to your Expo app 👋
+# Recipe-App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A beautiful and dynamic recipe discovery mobile application built with React Native and Expo.
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+- **Delicious Red Design System**: A premium, vibrant UI with smooth animations.
+- **Recipe Discovery**:
+  - Browse recipes by categories (horizontal scrolling).
+  - "Popular Recipes" section.
+  - Search functionality with filters.
+- **Recipe Details**:
+  - Detailed view with high-quality images, description, cooking time, and nutrition info.
+  - Ingredients list and step-by-step instructions.
+  - Favorite system to save loved recipes.
+- **News & Articles**: Stay updated with culinary news/articles (RSS feed integration).
+- **Interactive Elements**:
+  - Comment system with reply functionality.
+  - Smooth staggered animations for lists and page transitions.
+- **State Management**: Powered by Zustand for global state (Recipes, Ingredients, User).
+
+## 🛠 Tech Stack
+
+- **Framework**: [Expo](https://expo.dev) (React Native)
+- **Language**: TypeScript
+- **Navigation**: Expo Router
+- **State Management**: Zustand
+- **Styling**: Custom CSS / Styles
+
+## 🚀 Get Started
+
+1. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. **Start the app**
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   In the output, you'll find options to open the app in a:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   - Development build
+   - Android emulator
+   - iOS simulator
+   - Expo Go
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 📂 Project Structure
 
-## Get a fresh project
+- **app/**: Main application screens and routing.
+- **src/stores/**: Zustand state stores (e.g., `useRecipeStore`, `useIngredientStore`).
+- **src/components/**: Reusable UI components.
+- **src/constants/**: App constants and configuration.
 
-When you're ready, run:
+## 🤝 Contributing
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-# Recipe-App
+Contributions are welcome!

@@ -1,40 +1,36 @@
-export interface CategoryResponse {
-    id: string;
-    name: string;
-    status: string;
-}
+import { Category } from "./categories";
+import { IngredientItem } from "./ingredient.type";
+import { NutritionItem } from "./nutrition.type";
+import { UserInfo } from "./user.type";
 
-export interface IngredientResponse {
-    id: string;
-    name: string;
-    image?: string;
-}
-
-export interface NutritionResponse {
-    id: string;
-    name: string;
-    type: string;
-}
-
-export interface IngredientItemResponse {
-    ingredient: IngredientResponse;
-    quantity: number;
-}
-
-export interface NutritionItemResponse {
-    nutrition: NutritionResponse;
-    value: number;
-}
-
-export interface RecipeResponse {
+export interface Recipe {
     id: string;
     name: string;
     description: string;
     image: string;
     instructions: string;
     time: number;
-    category: CategoryResponse;
-    ingredients: IngredientItemResponse[];
-    nutritions: NutritionItemResponse[];
+    category: Category;
+    ingredients: IngredientItem[];
+    nutritions: NutritionItem[];
+    author?: UserInfo;
 }
 
+export interface RecipeState {
+    recipes: Recipe[];
+    activeRecipe: Recipe | null;
+    myRecipes: Recipe[];
+    favoriteRecipes: Recipe[];
+    loading: boolean;
+    error: string | null;
+
+    setRecipes: (recipes: Recipe[]) => void;
+    getAllRecipes: () => Promise<void>;
+    getRecipeById: (id: string) => Promise<void>;
+    getRecipesByCategoryId: (categoryId: string) => Promise<void>;
+    getMyRecipes: () => Promise<void>;
+    getMyFavoriteRecipes: () => Promise<void>;
+    addFavoriteRecipe: (recipeId: string) => Promise<void>;
+    removeFavoriteRecipe: (recipeId: string) => Promise<void>;
+    createRecipe: (data: any) => Promise<boolean>;
+}

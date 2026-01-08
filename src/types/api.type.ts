@@ -1,6 +1,10 @@
 export interface ApiResponse<T> {
-    code: number;
-    status: string;
-    data: T,
+    status: number;
+    result: T,
+}
+
+export interface ApiError {
+    isApiError: boolean;
+    status: number;
     message: string;
 }

@@ -1,6 +1,15 @@
+import { FadeInView } from "@/src/components/Animated/FadeInView";
+import RecipeItem from "@/src/components/Recipe/RecipeItem";
 import { useAuthStore } from "@/src/stores/auth.store";
 import { useCategoryStore } from "@/src/stores/category.store";
+import { useRecipeStore } from "@/src/stores/recipe.store";
+import { useSearchStore } from "@/src/stores/search.store";
+import {
+  handleCategoryPress,
+  handleSeeAll,
+} from "@/src/utils/helper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
@@ -10,18 +19,22 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Badge, Text } from "react-native-paper";
+import { ActivityIndicator, Badge, Text } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
+  const router = useRouter();
   const [greeting, setGreeting] = useState("");
   const { user } = useAuthStore();
-
   const { categories, getAllCategories } = useCategoryStore();
+  const { recipes, getAllRecipes, loading: recipesLoading } = useRecipeStore();
+  const { setActiveCategory, reset } = useSearchStore();
+
   const username = user?.username || "Chef";
 
   useEffect(() => {
     getAllCategories();
+    getAllRecipes();
   }, []);
 
   useEffect(() => {
@@ -30,6 +43,8 @@ export default function Index() {
     else if (hours < 18) setGreeting("Good Afternoon");
     else setGreeting("Good Evening");
   }, []);
+
+  const popularRecipes = recipes.slice(0, 4);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -40,7 +55,10 @@ export default function Index() {
           <Text style={styles.usernameText}>{username}!</Text>
         </View>
 
-        <TouchableOpacity style={styles.cartContainer} onPress={() => {}}>
+        <TouchableOpacity
+          style={styles.cartContainer}
+          onPress={() => router.push("/cart")}
+        >
           <MaterialCommunityIcons
             name="cart-outline"
             size={28}
@@ -57,71 +75,73 @@ export default function Index() {
         showsVerticalScrollIndicator={false}
       >
         {/* Banner Section */}
-        <View style={styles.bannerContainer}>
-          <Image
-            source={require("@/src/assets/banner.jpg")}
-            style={styles.bannerImage}
-          />
-          <View style={styles.bannerOverlay}>
-            <Text style={styles.bannerText}>
-              What would you like to cook today?
-            </Text>
+        <FadeInView delay={200} duration={600}>
+          <View style={styles.bannerContainer}>
+            <Image
+              source={require("@/src/assets/banner.jpg")}
+              style={styles.bannerImage}
+            />
           </View>
-        </View>
+        </FadeInView>
 
         {/* Categories Section */}
-        <View style={styles.sectionHeader}>
-          <Text variant="titleLarge" style={styles.sectionTitle}>
-            Categories
-          </Text>
-          <TouchableOpacity>
-            <Text style={styles.seeAll}>See all</Text>
-          </TouchableOpacity>
-        </View>
-
-        <FlatList
-          data={categories}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.categoriesList}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.categoryCard}>
-              <Text style={styles.categoryLabel}>{item.name}</Text>
+        <FadeInView delay={100} duration={600}>
+          <View style={styles.sectionHeader}>
+            <Text variant="titleLarge" style={styles.sectionTitle}>
+              Categories
+            </Text>
+            <TouchableOpacity onPress={() => handleSeeAll(reset)}>
+              <Text style={styles.seeAll}>See all</Text>
             </TouchableOpacity>
-          )}
-        />
+          </View>
+
+          <FlatList
+            data={categories}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.categoriesList}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.categoryCard}
+                onPress={() => handleCategoryPress(item.id, setActiveCategory)}
+              >
+                <Text style={styles.categoryLabel}>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </FadeInView>
 
         {/* Popular Recipes Section */}
-        <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-          <Text variant="titleLarge" style={styles.sectionTitle}>
-            Popular Recipes
-          </Text>
-          <TouchableOpacity>
-            <Text style={styles.seeAll}>See all</Text>
-          </TouchableOpacity>
-        </View>
+        <FadeInView delay={300} duration={600}>
+          <View style={styles.sectionHeader}>
+            <Text variant="titleLarge" style={styles.sectionTitle}>
+              Fresh Recipes
+            </Text>
+            <TouchableOpacity onPress={() => handleSeeAll(reset)}>
+              <Text style={styles.seeAll}>See all</Text>
+            </TouchableOpacity>
+          </View>
+        </FadeInView>
 
-        <View style={styles.recipesGrid}>
-          {/* Placeholder Recipe Cards */}
-          {[1, 2, 3, 4].map((item) => (
-            <View key={item} style={styles.recipeCard}>
-              <View style={styles.recipeImagePlaceholder}>
-                <MaterialCommunityIcons
-                  name="food-turkey"
-                  size={40}
-                  color="#DC2626"
-                />
-              </View>
-              <View style={styles.recipeInfo}>
-                <Text style={styles.recipeTitle} numberOfLines={1}>
-                  Delicious Recipe {item}
-                </Text>
-                <Text style={styles.recipeMeta}>20 mins • Easy</Text>
-              </View>
-            </View>
-          ))}
-        </View>
+        {recipesLoading && recipes.length === 0 ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="#DC2626" />
+          </View>
+        ) : (
+          <View style={styles.recipesGrid}>
+            {popularRecipes.map((item, index) => (
+              <RecipeItem key={item.id} item={item} index={index} />
+            ))}
+            {popularRecipes.length === 0 && !recipesLoading && (
+              <Text
+                style={{ textAlign: "center", width: "100%", color: "gray" }}
+              >
+                No recipes found.
+              </Text>
+            )}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -136,11 +156,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 24,
+    paddingBottom: 8,
     backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
   },
   greetingContainer: {
     flex: 1,
@@ -148,129 +166,95 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: 14,
     color: "#6B7280",
-    fontWeight: "500",
+    fontWeight: "600",
+    marginBottom: 4,
   },
   usernameText: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 26,
+    fontWeight: "800",
     color: "#1F2937",
+    letterSpacing: -0.5,
   },
   cartContainer: {
-    padding: 8,
+    padding: 10,
+    backgroundColor: "#FEF2F2",
+    borderRadius: 14,
     position: "relative",
   },
   badge: {
     position: "absolute",
-    top: 4,
-    right: 4,
+    top: -6,
+    right: -6,
     backgroundColor: "#DC2626",
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 10,
+    fontWeight: "bold",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
   scrollContent: {
     paddingBottom: 40,
+    paddingTop: 0,
   },
   bannerContainer: {
-    margin: 20,
+    width: "100%",
     marginBottom: 24,
-    borderRadius: 16,
-    overflow: "hidden",
-    position: "relative",
-    backgroundColor: "#E5E7EB",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    height: 200,
   },
   bannerImage: {
     width: "100%",
-    height: 180,
+    height: "100%",
     resizeMode: "cover",
-  },
-  bannerOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    padding: 16,
-  },
-  bannerText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: 12,
+    paddingHorizontal: 24,
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: "800",
     color: "#1F2937",
+    letterSpacing: -0.3,
   },
   seeAll: {
     color: "#DC2626",
-    fontWeight: "600",
+    fontWeight: "700",
+    fontSize: 14,
   },
   categoriesList: {
-    paddingHorizontal: 20,
-    gap: 12,
+    paddingHorizontal: 24,
+    paddingBottom: 8,
   },
   categoryCard: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: "#DC2626",
-    borderRadius: 24,
-    marginRight: 8,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+    borderRadius: 20, // Pill shape
+    marginRight: 10,
     elevation: 2,
-    shadowColor: "#DC2626",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.05,
     shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
   },
   categoryLabel: {
     fontSize: 14,
-    color: "#fff",
-    fontWeight: "600",
+    color: "#4B5563",
+    fontWeight: "700",
   },
   recipesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingHorizontal: 20,
-    gap: 16,
+    paddingHorizontal: 16, // Reduced to balance with negative margins if needed
   },
-  recipeCard: {
-    width: "47%",
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    overflow: "hidden",
-  },
-  recipeImagePlaceholder: {
-    height: 120,
-    backgroundColor: "#FEE2E2",
-    justifyContent: "center",
+  loadingContainer: {
+    padding: 40,
     alignItems: "center",
-  },
-  recipeInfo: {
-    padding: 12,
-  },
-  recipeTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#1F2937",
-    marginBottom: 4,
-  },
-  recipeMeta: {
-    fontSize: 12,
-    color: "#6B7280",
+    justifyContent: "center",
   },
 });
