@@ -4,10 +4,7 @@ import { useAuthStore } from "@/src/stores/auth.store";
 import { useCategoryStore } from "@/src/stores/category.store";
 import { useRecipeStore } from "@/src/stores/recipe.store";
 import { useSearchStore } from "@/src/stores/search.store";
-import {
-  handleCategoryPress,
-  handleSeeAll,
-} from "@/src/utils/helper";
+import { handleCategoryPress, handleSeeAll } from "@/src/utils/helper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -19,11 +16,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ActivityIndicator, Badge, Text } from "react-native-paper";
+import { ActivityIndicator, Badge, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const router = useRouter();
+  const theme = useTheme();
   const [greeting, setGreeting] = useState("");
   const { user } = useAuthStore();
   const { categories, getAllCategories } = useCategoryStore();
@@ -47,24 +45,46 @@ export default function Index() {
   const popularRecipes = recipes.slice(0, 4);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {/* Header Section */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
         <View style={styles.greetingContainer}>
-          <Text style={styles.greetingText}>{greeting},</Text>
-          <Text style={styles.usernameText}>{username}!</Text>
+          <Text
+            style={[styles.greetingText, { color: theme.colors.secondary }]}
+          >
+            {greeting},
+          </Text>
+          <Text
+            style={[styles.usernameText, { color: theme.colors.onSurface }]}
+          >
+            {username}!
+          </Text>
         </View>
 
         <TouchableOpacity
-          style={styles.cartContainer}
+          style={[
+            styles.cartContainer,
+            { backgroundColor: theme.colors.primaryContainer },
+          ]}
           onPress={() => router.push("/cart")}
         >
           <MaterialCommunityIcons
             name="cart-outline"
             size={28}
-            color="#DC2626"
+            color={theme.colors.primary}
           />
-          <Badge style={styles.badge} size={16}>
+          <Badge
+            style={[
+              styles.badge,
+              {
+                backgroundColor: theme.colors.primary,
+                borderColor: theme.colors.surface,
+              },
+            ]}
+            size={16}
+          >
             3
           </Badge>
         </TouchableOpacity>
@@ -87,11 +107,16 @@ export default function Index() {
         {/* Categories Section */}
         <FadeInView delay={100} duration={600}>
           <View style={styles.sectionHeader}>
-            <Text variant="titleLarge" style={styles.sectionTitle}>
+            <Text
+              variant="titleLarge"
+              style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+            >
               Categories
             </Text>
             <TouchableOpacity onPress={() => handleSeeAll(reset)}>
-              <Text style={styles.seeAll}>See all</Text>
+              <Text style={[styles.seeAll, { color: theme.colors.primary }]}>
+                See all
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -103,10 +128,23 @@ export default function Index() {
             contentContainerStyle={styles.categoriesList}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={styles.categoryCard}
+                style={[
+                  styles.categoryCard,
+                  {
+                    backgroundColor: theme.colors.surface,
+                    borderColor: theme.colors.outlineVariant,
+                  },
+                ]}
                 onPress={() => handleCategoryPress(item.id, setActiveCategory)}
               >
-                <Text style={styles.categoryLabel}>{item.name}</Text>
+                <Text
+                  style={[
+                    styles.categoryLabel,
+                    { color: theme.colors.onSurface },
+                  ]}
+                >
+                  {item.name}
+                </Text>
               </TouchableOpacity>
             )}
           />
@@ -115,18 +153,23 @@ export default function Index() {
         {/* Popular Recipes Section */}
         <FadeInView delay={300} duration={600}>
           <View style={styles.sectionHeader}>
-            <Text variant="titleLarge" style={styles.sectionTitle}>
+            <Text
+              variant="titleLarge"
+              style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+            >
               Fresh Recipes
             </Text>
             <TouchableOpacity onPress={() => handleSeeAll(reset)}>
-              <Text style={styles.seeAll}>See all</Text>
+              <Text style={[styles.seeAll, { color: theme.colors.primary }]}>
+                See all
+              </Text>
             </TouchableOpacity>
           </View>
         </FadeInView>
 
         {recipesLoading && recipes.length === 0 ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#DC2626" />
+            <ActivityIndicator size="small" color={theme.colors.primary} />
           </View>
         ) : (
           <View style={styles.recipesGrid}>
@@ -135,7 +178,11 @@ export default function Index() {
             ))}
             {popularRecipes.length === 0 && !recipesLoading && (
               <Text
-                style={{ textAlign: "center", width: "100%", color: "gray" }}
+                style={{
+                  textAlign: "center",
+                  width: "100%",
+                  color: theme.colors.secondary,
+                }}
               >
                 No recipes found.
               </Text>
@@ -150,7 +197,6 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
   },
   header: {
     flexDirection: "row",
@@ -158,26 +204,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 24,
     paddingBottom: 8,
-    backgroundColor: "#fff",
   },
   greetingContainer: {
     flex: 1,
   },
   greetingText: {
     fontSize: 14,
-    color: "#6B7280",
     fontWeight: "600",
     marginBottom: 4,
   },
   usernameText: {
     fontSize: 26,
     fontWeight: "800",
-    color: "#1F2937",
     letterSpacing: -0.5,
   },
   cartContainer: {
     padding: 10,
-    backgroundColor: "#FEF2F2",
     borderRadius: 14,
     position: "relative",
   },
@@ -185,12 +227,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -6,
     right: -6,
-    backgroundColor: "#DC2626",
     color: "#FFFFFF",
     fontSize: 10,
     fontWeight: "bold",
     borderWidth: 2,
-    borderColor: "#fff",
   },
   scrollContent: {
     paddingBottom: 40,
@@ -216,11 +256,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#1F2937",
     letterSpacing: -0.3,
   },
   seeAll: {
-    color: "#DC2626",
     fontWeight: "700",
     fontSize: 14,
   },
@@ -231,7 +269,6 @@ const styles = StyleSheet.create({
   categoryCard: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: "#fff",
     borderRadius: 20, // Pill shape
     marginRight: 10,
     elevation: 2,
@@ -240,11 +277,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
   },
   categoryLabel: {
     fontSize: 14,
-    color: "#4B5563",
     fontWeight: "700",
   },
   recipesGrid: {

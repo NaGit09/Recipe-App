@@ -5,12 +5,14 @@ import { useRecipeStore } from "@/src/stores/recipe.store";
 import { useSearchStore } from "@/src/stores/search.store";
 import React, { useEffect } from "react";
 import { StatusBar, StyleSheet } from "react-native";
+import { useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Search = () => {
   const { getAllRecipes, getRecipesByCategoryId } = useRecipeStore();
   const { getAllCategories } = useCategoryStore();
   const { activeCategory } = useSearchStore();
+  const theme = useTheme();
 
   useEffect(() => {
     const initData = async () => {
@@ -32,8 +34,11 @@ const Search = () => {
   }, [activeCategory]);
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      edges={["top", "left", "right"]}
+    >
+      <StatusBar barStyle={theme.dark ? "light-content" : "dark-content"} />
       <SearchResult ListHeaderComponent={<SearchHeader />} />
     </SafeAreaView>
   );
@@ -42,7 +47,6 @@ const Search = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
 });
 

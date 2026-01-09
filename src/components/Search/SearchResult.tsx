@@ -3,7 +3,7 @@ import { useSearchStore } from "@/src/stores/search.store";
 import { Feather } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
+import { Text, useTheme } from "react-native-paper";
 import RecipeCard from "../Recipe/RecipeCard";
 
 interface SearchResultProps {
@@ -13,6 +13,7 @@ interface SearchResultProps {
 const SearchResult = ({ ListHeaderComponent }: SearchResultProps) => {
   const { recipes, loading: loadingRecipes } = useRecipeStore();
   const { keyword, activeCategory } = useSearchStore();
+  const theme = useTheme();
 
   const filteredRecipes = useMemo(() => {
     let result = recipes;
@@ -45,15 +46,24 @@ const SearchResult = ({ ListHeaderComponent }: SearchResultProps) => {
       ListEmptyComponent={
         !loadingRecipes ? (
           <View style={styles.emptyContainer}>
-            <Feather name="inbox" size={48} color="#ccc" />
-            <Text style={styles.emptyText}>No recipes found</Text>
-            <Text style={styles.emptySubtext}>
+            <Feather name="inbox" size={48} color={theme.colors.outline} />
+            <Text
+              style={[
+                styles.emptyText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              No recipes found
+            </Text>
+            <Text
+              style={[styles.emptySubtext, { color: theme.colors.outline }]}
+            >
               Try adjusting your search or category
             </Text>
           </View>
         ) : (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#4DB6AC" />
+            <ActivityIndicator size="large" color={theme.colors.primary} />
           </View>
         )
       }
@@ -84,12 +94,10 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#444",
     marginTop: 20,
   },
   emptySubtext: {
     fontSize: 14,
-    color: "#888",
     marginTop: 8,
   },
 });

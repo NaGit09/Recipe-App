@@ -3,9 +3,12 @@ import { handleRecipePress } from "@/src/utils/helper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useTheme } from "react-native-paper";
 import { FadeInView } from "../Animated/FadeInView";
 
 const RecipeItem = ({ item, index }: { item: Recipe; index: number }) => {
+  const theme = useTheme();
+
   return (
     <FadeInView
       key={item.id}
@@ -13,11 +16,16 @@ const RecipeItem = ({ item, index }: { item: Recipe; index: number }) => {
       style={styles.recipeCardWrapper}
     >
       <TouchableOpacity
-        style={styles.recipeCard}
+        style={[styles.recipeCard, { backgroundColor: theme.colors.surface }]}
         onPress={() => handleRecipePress(item.id)}
         activeOpacity={0.9}
       >
-        <View style={styles.recipeImageWrapper}>
+        <View
+          style={[
+            styles.recipeImageWrapper,
+            { backgroundColor: theme.colors.surfaceVariant },
+          ]}
+        >
           {item.image ? (
             <Image source={{ uri: item.image }} style={styles.recipeImage} />
           ) : (
@@ -25,29 +33,44 @@ const RecipeItem = ({ item, index }: { item: Recipe; index: number }) => {
               <MaterialCommunityIcons
                 name="food-turkey"
                 size={40}
-                color="#DC2626"
+                color={theme.colors.primary}
               />
             </View>
           )}
-          <TouchableOpacity style={styles.likeButton}>
+          <TouchableOpacity
+            style={[
+              styles.likeButton,
+              { backgroundColor: theme.colors.surface },
+            ]}
+          >
             <MaterialCommunityIcons
               name="heart-outline"
               size={20}
-              color="#DC2626"
+              color={theme.colors.primary}
             />
           </TouchableOpacity>
         </View>
         <View style={styles.recipeInfo}>
-          <Text style={styles.recipeTitle} numberOfLines={2}>
+          <Text
+            style={[styles.recipeTitle, { color: theme.colors.onSurface }]}
+            numberOfLines={2}
+          >
             {item.name}
           </Text>
-          <View style={styles.recipeMetaContainer}>
+          <View
+            style={[
+              styles.recipeMetaContainer,
+              { backgroundColor: theme.colors.primaryContainer },
+            ]}
+          >
             <MaterialCommunityIcons
               name="clock-outline"
               size={14}
-              color="#DC2626"
+              color={theme.colors.primary}
             />
-            <Text style={styles.recipeMeta}>{item.time} mins</Text>
+            <Text style={[styles.recipeMeta, { color: theme.colors.primary }]}>
+              {item.time} mins
+            </Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -61,7 +84,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   recipeCard: {
-    backgroundColor: "#fff",
     borderRadius: 20,
     elevation: 4,
     shadowColor: "#000",
@@ -73,7 +95,6 @@ const styles = StyleSheet.create({
   recipeImageWrapper: {
     height: 150,
     width: "100%",
-    backgroundColor: "#F3F4F6",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: "hidden",
@@ -94,7 +115,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     right: 10,
-    backgroundColor: "#fff",
     padding: 6,
     borderRadius: 20,
     elevation: 2,
@@ -110,14 +130,12 @@ const styles = StyleSheet.create({
   recipeTitle: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#1F2937",
     marginBottom: 8,
     lineHeight: 22,
   },
   recipeMetaContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FEF2F2",
     alignSelf: "flex-start",
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -125,7 +143,6 @@ const styles = StyleSheet.create({
   },
   recipeMeta: {
     fontSize: 12,
-    color: "#DC2626",
     fontWeight: "700",
     marginLeft: 4,
   },

@@ -9,26 +9,35 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import {IconButton, Text } from "react-native-paper";
+import { IconButton, Text, useTheme } from "react-native-paper";
 
 export default function NotificationScreen() {
   const { notifications, markAllAsRead } = useNotificationStore();
+  const theme = useTheme();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
+      <StatusBar barStyle={theme.dark ? "light-content" : "dark-content"} />
       <View style={styles.header}>
         <View>
-          <Text variant="headlineMedium" style={styles.headerTitle}>
+          <Text
+            variant="headlineMedium"
+            style={[styles.headerTitle, { color: theme.colors.onSurface }]}
+          >
             Notifications
           </Text>
-          <Text variant="bodyMedium" style={styles.headerSubtitle}>
+          <Text
+            variant="bodyMedium"
+            style={[styles.headerSubtitle, { color: theme.colors.secondary }]}
+          >
             Stay updated with your recipes
           </Text>
         </View>
         <IconButton
           icon="check-all"
-          iconColor="#DC2626"
+          iconColor={theme.colors.primary}
           size={24}
           onPress={markAllAsRead}
           style={styles.markReadBtn}
@@ -37,7 +46,7 @@ export default function NotificationScreen() {
 
       <FlatList
         data={notifications}
-        renderItem={({item}) => <NotificationCard item={item} />}
+        renderItem={({ item }) => <NotificationCard item={item} />}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
@@ -45,9 +54,11 @@ export default function NotificationScreen() {
             <MaterialCommunityIcons
               name="bell-sleep-outline"
               size={64}
-              color="#D1D5DB"
+              color={theme.colors.outline}
             />
-            <Text style={styles.emptyText}>No notifications yet</Text>
+            <Text style={[styles.emptyText, { color: theme.colors.secondary }]}>
+              No notifications yet
+            </Text>
           </View>
         }
       />
@@ -58,7 +69,6 @@ export default function NotificationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   header: {
     paddingHorizontal: 20,
@@ -70,10 +80,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontWeight: "bold",
-    color: "#1F2937",
   },
   headerSubtitle: {
-    color: "#6B7280",
     marginTop: 4,
   },
   markReadBtn: {
@@ -90,6 +98,5 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    color: "#9CA3AF",
   },
 });

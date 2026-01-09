@@ -18,11 +18,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Button, IconButton, Text, TextInput } from "react-native-paper";
+import {
+  Button,
+  IconButton,
+  Text,
+  TextInput,
+  useTheme,
+} from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CreateRecipeScreen() {
   const router = useRouter();
+  const theme = useTheme();
   const { createRecipe } = useRecipeStore();
   const { categories, getAllCategories } = useCategoryStore();
   const { ingredients, getAllIngredients } = useIngredientStore();
@@ -174,11 +181,28 @@ export default function CreateRecipeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {/* Header */}
-      <View style={styles.header}>
-        <IconButton icon="arrow-left" onPress={() => router.back()} />
-        <Text variant="titleLarge" style={styles.headerTitle}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: theme.colors.surface,
+            borderBottomColor: theme.colors.outlineVariant,
+          },
+        ]}
+      >
+        <IconButton
+          icon="arrow-left"
+          onPress={() => router.back()}
+          iconColor={theme.colors.onSurface}
+        />
+        <Text
+          variant="titleLarge"
+          style={[styles.headerTitle, { color: theme.colors.onSurface }]}
+        >
           Create Recipe
         </Text>
         <View style={{ width: 40 }} />
@@ -186,13 +210,35 @@ export default function CreateRecipeScreen() {
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Image Upload */}
-        <TouchableOpacity style={styles.imageUpload} onPress={pickImage}>
+        <TouchableOpacity
+          style={[
+            styles.imageUpload,
+            { backgroundColor: theme.colors.surface },
+          ]}
+          onPress={pickImage}
+        >
           {image ? (
             <Image source={{ uri: image }} style={styles.uploadedImage} />
           ) : (
-            <View style={styles.imagePlaceholder}>
-              <Feather name="camera" size={32} color="#9CA3AF" />
-              <Text style={styles.uploadText}>Add Cover Photo</Text>
+            <View
+              style={[
+                styles.imagePlaceholder,
+                {
+                  backgroundColor: theme.colors.surfaceVariant,
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Feather
+                name="camera"
+                size={32}
+                color={theme.colors.onSurfaceVariant}
+              />
+              <Text
+                style={[styles.uploadText, { color: theme.colors.primary }]}
+              >
+                Add Cover Photo
+              </Text>
             </View>
           )}
         </TouchableOpacity>
@@ -202,7 +248,10 @@ export default function CreateRecipeScreen() {
           mode="outlined"
           value={name}
           onChangeText={setName}
-          style={styles.input}
+          style={[styles.input, { backgroundColor: theme.colors.surface }]}
+          outlineColor={theme.colors.outline}
+          activeOutlineColor={theme.colors.primary}
+          textColor={theme.colors.onSurface}
         />
 
         <TextInput
@@ -212,7 +261,10 @@ export default function CreateRecipeScreen() {
           onChangeText={setDescription}
           multiline
           numberOfLines={3}
-          style={styles.input}
+          style={[styles.input, { backgroundColor: theme.colors.surface }]}
+          outlineColor={theme.colors.outline}
+          activeOutlineColor={theme.colors.primary}
+          textColor={theme.colors.onSurface}
         />
 
         <View style={styles.row}>
@@ -222,11 +274,23 @@ export default function CreateRecipeScreen() {
             value={time}
             onChangeText={setTime}
             keyboardType="numeric"
-            style={[styles.input, { flex: 1, marginRight: 8 }]}
+            style={[
+              styles.input,
+              {
+                flex: 1,
+                marginRight: 8,
+                backgroundColor: theme.colors.surface,
+              },
+            ]}
+            outlineColor={theme.colors.outline}
+            activeOutlineColor={theme.colors.primary}
+            textColor={theme.colors.onSurface}
           />
         </View>
 
-        <Text style={styles.sectionTitle}>Category</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
+          Category
+        </Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -237,14 +301,22 @@ export default function CreateRecipeScreen() {
               key={c.id}
               style={[
                 styles.categoryChip,
-                categoryId === c.id && styles.categoryChipSelected,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outline,
+                },
+                categoryId === c.id && {
+                  backgroundColor: theme.colors.primary,
+                  borderColor: theme.colors.primary,
+                },
               ]}
               onPress={() => setCategoryId(c.id)}
             >
               <Text
                 style={[
                   styles.categoryChipText,
-                  categoryId === c.id && styles.categoryChipTextSelected,
+                  { color: theme.colors.onSurface },
+                  categoryId === c.id && { color: theme.colors.onPrimary },
                 ]}
               >
                 {c.name}
@@ -260,20 +332,41 @@ export default function CreateRecipeScreen() {
           onChangeText={setInstructions}
           multiline
           numberOfLines={6}
-          style={styles.input}
+          style={[styles.input, { backgroundColor: theme.colors.surface }]}
           placeholder="Step 1: ..."
+          outlineColor={theme.colors.outline}
+          activeOutlineColor={theme.colors.primary}
+          textColor={theme.colors.onSurface}
+          placeholderTextColor={theme.colors.onSurfaceDisabled}
         />
 
         {/* Ingredients Section */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Ingredients</Text>
-          <Button mode="text" onPress={() => setIngredientModalVisible(true)}>
+          <Text
+            style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+          >
+            Ingredients
+          </Text>
+          <Button
+            mode="text"
+            onPress={() => setIngredientModalVisible(true)}
+            textColor={theme.colors.primary}
+          >
             + Add
           </Button>
         </View>
         {selectedIngredients.map((item, index) => (
-          <View key={item.ingredient.id} style={styles.listItem}>
-            <Text style={{ flex: 1 }}>
+          <View
+            key={item.ingredient.id}
+            style={[
+              styles.listItem,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <Text style={{ flex: 1, color: theme.colors.onSurface }}>
               {item.ingredient.name} ({item.ingredient.unit})
             </Text>
             <TextInput
@@ -281,12 +374,19 @@ export default function CreateRecipeScreen() {
               value={item.quantity}
               onChangeText={(txt) => updateIngredientQuantity(index, txt)}
               keyboardType="numeric"
-              style={styles.qtyInput}
+              style={[
+                styles.qtyInput,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
               dense
+              outlineColor={theme.colors.outline}
+              activeOutlineColor={theme.colors.primary}
+              textColor={theme.colors.onSurface}
             />
             <IconButton
               icon="close"
               size={20}
+              iconColor={theme.colors.error}
               onPress={() => handleRemoveIngredient(index)}
             />
           </View>
@@ -294,14 +394,31 @@ export default function CreateRecipeScreen() {
 
         {/* Nutrition Section */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Nutrition</Text>
-          <Button mode="text" onPress={() => setNutritionModalVisible(true)}>
+          <Text
+            style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+          >
+            Nutrition
+          </Text>
+          <Button
+            mode="text"
+            onPress={() => setNutritionModalVisible(true)}
+            textColor={theme.colors.primary}
+          >
             + Add
           </Button>
         </View>
         {selectedNutritions.map((item, index) => (
-          <View key={item.nutrition.id} style={styles.listItem}>
-            <Text style={{ flex: 1 }}>
+          <View
+            key={item.nutrition.id}
+            style={[
+              styles.listItem,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <Text style={{ flex: 1, color: theme.colors.onSurface }}>
               {item.nutrition.name} ({item.nutrition.unit})
             </Text>
             <TextInput
@@ -309,12 +426,19 @@ export default function CreateRecipeScreen() {
               value={item.value}
               onChangeText={(txt) => updateNutritionValue(index, txt)}
               keyboardType="numeric"
-              style={styles.qtyInput}
+              style={[
+                styles.qtyInput,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
               dense
+              outlineColor={theme.colors.outline}
+              activeOutlineColor={theme.colors.primary}
+              textColor={theme.colors.onSurface}
             />
             <IconButton
               icon="close"
               size={20}
+              iconColor={theme.colors.error}
               onPress={() => handleRemoveNutrition(index)}
             />
           </View>
@@ -324,8 +448,12 @@ export default function CreateRecipeScreen() {
           mode="contained"
           onPress={handleCreate}
           loading={loading}
-          style={styles.submitButton}
+          style={[
+            styles.submitButton,
+            { backgroundColor: theme.colors.primary },
+          ]}
           contentStyle={{ paddingVertical: 8 }}
+          labelStyle={{ color: theme.colors.onPrimary }}
         >
           Create Recipe
         </Button>
@@ -338,11 +466,27 @@ export default function CreateRecipeScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setIngredientModalVisible(false)}
       >
-        <SafeAreaView style={{ flex: 1 }}>
-          <View style={styles.modalHeader}>
-            <Text variant="titleMedium">Select Ingredient</Text>
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: theme.colors.background }}
+        >
+          <View
+            style={[
+              styles.modalHeader,
+              {
+                backgroundColor: theme.colors.surface,
+                borderBottomColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <Text
+              variant="titleMedium"
+              style={{ color: theme.colors.onSurface }}
+            >
+              Select Ingredient
+            </Text>
             <IconButton
               icon="close"
+              iconColor={theme.colors.onSurface}
               onPress={() => setIngredientModalVisible(false)}
             />
           </View>
@@ -351,11 +495,16 @@ export default function CreateRecipeScreen() {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={styles.modalItem}
+                style={[
+                  styles.modalItem,
+                  { borderBottomColor: theme.colors.outlineVariant },
+                ]}
                 onPress={() => handleAddIngredient(item)}
               >
-                <Text>{item.name}</Text>
-                <Text style={{ color: "gray", fontSize: 12 }}>
+                <Text style={{ color: theme.colors.onSurface }}>
+                  {item.name}
+                </Text>
+                <Text style={{ color: theme.colors.secondary, fontSize: 12 }}>
                   Unit: {item.unit}
                 </Text>
               </TouchableOpacity>
@@ -371,11 +520,27 @@ export default function CreateRecipeScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setNutritionModalVisible(false)}
       >
-        <SafeAreaView style={{ flex: 1 }}>
-          <View style={styles.modalHeader}>
-            <Text variant="titleMedium">Select Nutrition</Text>
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: theme.colors.background }}
+        >
+          <View
+            style={[
+              styles.modalHeader,
+              {
+                backgroundColor: theme.colors.surface,
+                borderBottomColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <Text
+              variant="titleMedium"
+              style={{ color: theme.colors.onSurface }}
+            >
+              Select Nutrition
+            </Text>
             <IconButton
               icon="close"
+              iconColor={theme.colors.onSurface}
               onPress={() => setNutritionModalVisible(false)}
             />
           </View>
@@ -384,11 +549,18 @@ export default function CreateRecipeScreen() {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={styles.modalItem}
+                style={[
+                  styles.modalItem,
+                  { borderBottomColor: theme.colors.outlineVariant },
+                ]}
                 onPress={() => handleAddNutrition(item)}
               >
-                <Text>{item.name}</Text>
-                <Text style={{ color: "gray", fontSize: 12 }}>{item.type}</Text>
+                <Text style={{ color: theme.colors.onSurface }}>
+                  {item.name}
+                </Text>
+                <Text style={{ color: theme.colors.secondary, fontSize: 12 }}>
+                  {item.type}
+                </Text>
               </TouchableOpacity>
             )}
           />
@@ -401,7 +573,6 @@ export default function CreateRecipeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
   },
   header: {
     flexDirection: "row",
@@ -409,13 +580,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 8,
     paddingVertical: 8,
-    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
   },
   headerTitle: {
     fontWeight: "bold",
-    color: "#1F2937",
   },
   content: {
     padding: 20,
@@ -424,7 +592,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#1F2937",
     marginVertical: 12,
   },
   sectionHeader: {
@@ -440,7 +607,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 24,
     overflow: "hidden",
-    backgroundColor: "#fff",
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -450,11 +616,9 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#EFF6FF",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#DBEAFE",
     borderStyle: "dashed",
     borderRadius: 16,
   },
@@ -464,13 +628,11 @@ const styles = StyleSheet.create({
   },
   uploadText: {
     marginTop: 12,
-    color: "#3B82F6",
     fontWeight: "600",
     fontSize: 16,
   },
   input: {
     marginBottom: 16,
-    backgroundColor: "#fff",
   },
   row: {
     flexDirection: "row",
@@ -483,26 +645,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 24,
-    backgroundColor: "#fff",
     marginRight: 10,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  categoryChipSelected: {
-    backgroundColor: "#DC2626",
-    borderColor: "#DC2626",
-    elevation: 2,
   },
   categoryChipText: {
-    color: "#4B5563",
     fontWeight: "600",
-  },
-  categoryChipTextSelected: {
-    color: "#fff",
   },
   submitButton: {
     marginTop: 40,
-    backgroundColor: "#DC2626",
     borderRadius: 12,
     paddingVertical: 6,
     elevation: 4,
@@ -511,11 +661,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
-    backgroundColor: "#fff",
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -525,7 +673,6 @@ const styles = StyleSheet.create({
   qtyInput: {
     width: 80,
     height: 48,
-    backgroundColor: "#F9FAFB",
     marginHorizontal: 8,
     fontSize: 16,
   },
@@ -535,13 +682,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-    backgroundColor: "#fff",
   },
   modalItem: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

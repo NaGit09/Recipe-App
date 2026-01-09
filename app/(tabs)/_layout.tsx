@@ -2,8 +2,10 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Tabs } from "expo-router";
 import React from "react";
+import { useTheme } from "react-native-paper";
 
 export default function TabsLayout() {
+  const theme = useTheme();
   type FontAwesomeName = React.ComponentProps<typeof FontAwesome>["name"];
   type MaterialCommunityName = React.ComponentProps<
     typeof MaterialCommunityIcons
@@ -63,7 +65,16 @@ export default function TabsLayout() {
     },
   ];
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: "blue", headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: theme.colors.primary,
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.outlineVariant,
+        },
+      }}
+    >
       {screens.map((screen) => (
         <Tabs.Screen
           key={screen.name}

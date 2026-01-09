@@ -4,11 +4,12 @@ import { Category } from "@/src/types/categories";
 import { Feather } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Text, TextInput } from "react-native-paper";
+import { Text, TextInput, useTheme } from "react-native-paper";
 import CategoryItem from "../Category/CategoryItem";
 
 const SearchHeader = () => {
   const { keyword, setKeyword } = useSearchStore();
+  const theme = useTheme();
 
   const { categories } = useCategoryStore();
 
@@ -21,32 +22,50 @@ const SearchHeader = () => {
   }, [categories]);
 
   return (
-    <View style={styles.header}>
-      <Text style={styles.headerTitle}>Find Best Recipes</Text>
-      <Text style={styles.headerSubtitle}>For cooking</Text>
+    <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
+      <Text style={[styles.headerTitle, { color: theme.colors.onSurface }]}>
+        Find Best Recipes
+      </Text>
+      <Text
+        style={[
+          styles.headerSubtitle,
+          { color: theme.colors.onSurfaceVariant },
+        ]}
+      >
+        For cooking
+      </Text>
 
-      <View style={styles.searchContainer}>
+      <View
+        style={[
+          styles.searchContainer,
+          {
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.outlineVariant,
+            borderWidth: 1,
+          },
+        ]}
+      >
         <Feather
           name="search"
           size={20}
-          color="#999"
+          color={theme.colors.onSurfaceVariant}
           style={styles.searchIcon}
         />
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: "transparent" }]}
           placeholder="Search recipes..."
-          placeholderTextColor="#999"
+          placeholderTextColor={theme.colors.onSurfaceDisabled}
           value={keyword}
           onChangeText={setKeyword}
           underlineColor="transparent"
           activeUnderlineColor="transparent"
           showSoftInputOnFocus={true}
-          // @ts-ignore
+          textColor={theme.colors.onSurface}
           theme={{ colors: { primary: "transparent" } }}
         />
         {keyword.length > 0 && (
           <TouchableOpacity onPress={() => setKeyword("")}>
-            <Feather name="x" size={18} color="#999" />
+            <Feather name="x" size={18} color={theme.colors.onSurfaceVariant} />
           </TouchableOpacity>
         )}
       </View>
@@ -70,7 +89,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
     marginBottom: 0,
-    backgroundColor: "#fff",
   },
   headerTitle: {
     display: "none",
@@ -81,7 +99,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F3F4F6",
     borderRadius: 16,
     paddingHorizontal: 16,
     height: 52,
@@ -92,7 +109,6 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    backgroundColor: "transparent",
     fontSize: 16,
     height: 52,
     paddingHorizontal: 0,

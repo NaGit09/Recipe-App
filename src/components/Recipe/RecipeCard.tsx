@@ -4,36 +4,67 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Text } from "react-native-paper";
+import { Text, useTheme } from "react-native-paper";
 import { FadeInView } from "../Animated/FadeInView";
 
 const RecipeCard = ({ item, index }: { item: Recipe; index: number }) => {
   const router = useRouter();
+  const theme = useTheme();
+
   return (
-    <FadeInView delay={index * 100} style={styles.cardContainer}>
+    <FadeInView
+      delay={index * 100}
+      style={[styles.cardContainer, { backgroundColor: theme.colors.surface }]}
+    >
       <TouchableOpacity
         style={{ flex: 1 }}
         activeOpacity={0.9}
         onPress={() => router.push(`/recipe/${item.id}`)}
       >
-        <View style={styles.cardImageContainer}>
+        <View
+          style={[
+            styles.cardImageContainer,
+            { backgroundColor: theme.colors.surfaceVariant },
+          ]}
+        >
           <Image
             source={{ uri: item.image }}
             style={styles.cardImage}
             contentFit="cover"
             transition={200}
           />
-          <TouchableOpacity style={styles.likeButton}>
-            <Ionicons name="heart-outline" size={20} color="#DC2626" />
+          <TouchableOpacity
+            style={[
+              styles.likeButton,
+              { backgroundColor: theme.colors.surface },
+            ]}
+          >
+            <Ionicons
+              name="heart-outline"
+              size={20}
+              color={theme.colors.primary}
+            />
           </TouchableOpacity>
         </View>
         <View style={styles.cardContent}>
-          <Text style={styles.cardTitle} numberOfLines={2}>
+          <Text
+            style={[styles.cardTitle, { color: theme.colors.onSurface }]}
+            numberOfLines={2}
+          >
             {item.name}
           </Text>
-          <View style={styles.cardMetaContainer}>
-            <Feather name="clock" size={12} color="#DC2626" />
-            <Text style={styles.cardMetaText}>{item.time} min</Text>
+          <View
+            style={[
+              styles.cardMetaContainer,
+              { backgroundColor: theme.colors.primaryContainer },
+            ]}
+          >
+            <Feather name="clock" size={12} color={theme.colors.primary} />
+            <Text
+              style={[styles.cardMetaText, { color: theme.colors.primary }]}
+            >
+              {item.time} min
+            </Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -46,7 +77,6 @@ const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   cardContainer: {
     width: (width - 55) / 2,
-    backgroundColor: "#fff",
     borderRadius: 20,
     marginBottom: 0,
     elevation: 4,
@@ -59,7 +89,6 @@ const styles = StyleSheet.create({
   cardImageContainer: {
     width: "100%",
     height: 150,
-    backgroundColor: "#F3F4F6",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: "hidden",
@@ -73,7 +102,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     right: 10,
-    backgroundColor: "#fff",
     padding: 6,
     borderRadius: 20,
     elevation: 2,
@@ -89,14 +117,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#1F2937",
     marginBottom: 8,
     lineHeight: 22,
   },
   cardMetaContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FEF2F2",
     alignSelf: "flex-start",
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -104,7 +130,6 @@ const styles = StyleSheet.create({
   },
   cardMetaText: {
     fontSize: 12,
-    color: "#DC2626",
     fontWeight: "700",
     marginLeft: 4,
   },

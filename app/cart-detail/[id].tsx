@@ -14,12 +14,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ActivityIndicator, Surface, Text } from "react-native-paper";
+import { ActivityIndicator, Surface, Text, useTheme } from "react-native-paper";
 
 export default function CartDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuthStore();
+  const theme = useTheme();
   const isExiting = useRef(false);
 
   const [cartDetail, setCartDetail] = useState<CartItemDetail | null>(null);
@@ -95,8 +96,13 @@ export default function CartDetailScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#DC2626" />
+      <SafeAreaView
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </SafeAreaView>
     );
   }
@@ -108,21 +114,34 @@ export default function CartDetailScreen() {
     cartDetail.items.length === 0
   ) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
+        <View
+          style={[styles.header, { backgroundColor: theme.colors.surface }]}
+        >
           <TouchableOpacity
             onPress={() => router.back()}
             style={{ padding: 4 }}
           >
-            <Feather name="arrow-left" size={24} color="#1F2937" />
+            <Feather
+              name="arrow-left"
+              size={24}
+              color={theme.colors.onSurface}
+            />
           </TouchableOpacity>
-          <Text variant="headlineSmall" style={styles.headerTitle}>
+          <Text
+            variant="headlineSmall"
+            style={[styles.headerTitle, { color: theme.colors.onSurface }]}
+          >
             Detail
           </Text>
           <View style={{ width: 32 }} />
         </View>
         <View style={styles.errorContainer}>
-          <Text>{error || "Item not found"}</Text>
+          <Text style={{ color: theme.colors.error }}>
+            {error || "Item not found"}
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -133,30 +152,45 @@ export default function CartDetailScreen() {
 
   if (!recipe) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
+        <View
+          style={[styles.header, { backgroundColor: theme.colors.surface }]}
+        >
           <TouchableOpacity
             onPress={() => router.back()}
             style={{ padding: 4 }}
           >
-            <Feather name="arrow-left" size={24} color="#1F2937" />
+            <Feather
+              name="arrow-left"
+              size={24}
+              color={theme.colors.onSurface}
+            />
           </TouchableOpacity>
         </View>
         <View style={styles.errorContainer}>
-          <Text>Recipe data is missing.</Text>
+          <Text style={{ color: theme.colors.error }}>
+            Recipe data is missing.
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
-          <Feather name="arrow-left" size={24} color="#1F2937" />
+          <Feather name="arrow-left" size={24} color={theme.colors.onSurface} />
         </TouchableOpacity>
-        <Text variant="headlineSmall" style={styles.headerTitle}>
+        <Text
+          variant="headlineSmall"
+          style={[styles.headerTitle, { color: theme.colors.onSurface }]}
+        >
           Cart Detail
         </Text>
         <View style={{ width: 32 }} />
@@ -164,36 +198,78 @@ export default function CartDetailScreen() {
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Recipe Info */}
-        <Surface style={styles.recipeCard} elevation={2}>
+        <Surface
+          style={[styles.recipeCard, { backgroundColor: theme.colors.surface }]}
+          elevation={2}
+        >
           {recipe.image ? (
             <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
           ) : (
             <View
-              style={[styles.recipeImage, { backgroundColor: "#E5E7EB" }]}
+              style={[
+                styles.recipeImage,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
             />
           )}
           <View style={styles.recipeInfo}>
-            <Text style={styles.recipeTitle}>{recipe.name}</Text>
-            <Text style={styles.recipeCategory}>{recipe.category?.name}</Text>
-            <View style={styles.metaRow}>
+            <Text
+              style={[styles.recipeTitle, { color: theme.colors.onSurface }]}
+            >
+              {recipe.name}
+            </Text>
+            <Text
+              style={[styles.recipeCategory, { color: theme.colors.primary }]}
+            >
+              {recipe.category?.name}
+            </Text>
+            <View
+              style={[
+                styles.metaRow,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
+            >
               <MaterialCommunityIcons
                 name="clock-outline"
                 size={16}
-                color="#6B7280"
+                color={theme.colors.onSurfaceVariant}
               />
-              <Text style={styles.metaText}>{recipe.time} mins</Text>
+              <Text
+                style={[
+                  styles.metaText,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {recipe.time} mins
+              </Text>
             </View>
           </View>
         </Surface>
 
-        <Text style={styles.sectionTitle}>Ingredients in Cart</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
+          Ingredients in Cart
+        </Text>
 
         {/* Ingredients List */}
         {ingredients.map((item, index) => {
           const totalPrice = (item.ingredient?.price || 0) * item.quantity;
           return (
-            <View key={index} style={styles.ingredientRow}>
-              <View style={styles.ingredientIcon}>
+            <View
+              key={index}
+              style={[
+                styles.ingredientRow,
+                { backgroundColor: theme.colors.surface },
+              ]}
+            >
+              <View
+                style={[
+                  styles.ingredientIcon,
+                  {
+                    backgroundColor: theme.colors.surfaceVariant,
+                    borderColor: theme.colors.outlineVariant,
+                  },
+                ]}
+              >
                 {item.ingredient?.image ? (
                   <Image
                     source={{ uri: item.ingredient.image }}
@@ -203,25 +279,45 @@ export default function CartDetailScreen() {
                   <MaterialCommunityIcons
                     name="food-apple"
                     size={24}
-                    color="#DC2626"
+                    color={theme.colors.primary}
                   />
                 )}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.ingredientName}>
+                <Text
+                  style={[
+                    styles.ingredientName,
+                    { color: theme.colors.onSurface },
+                  ]}
+                >
                   {item.ingredient?.name}
                 </Text>
-                <Text style={styles.ingredientPrice}>
+                <Text
+                  style={[
+                    styles.ingredientPrice,
+                    { color: theme.colors.secondary },
+                  ]}
+                >
                   ${item.ingredient?.price} / {item.ingredient?.unit}
                 </Text>
               </View>
               <View style={{ alignItems: "flex-end", marginLeft: 12 }}>
-                <Text style={styles.ingredientQuantity}>x{item.quantity}</Text>
+                <Text
+                  style={[
+                    styles.ingredientQuantity,
+                    {
+                      backgroundColor: theme.colors.surfaceVariant,
+                      color: theme.colors.onSurfaceVariant,
+                    },
+                  ]}
+                >
+                  x{item.quantity}
+                </Text>
                 <Text
                   style={{
                     fontSize: 14,
                     fontWeight: "700",
-                    color: "#DC2626",
+                    color: theme.colors.primary,
                     marginTop: 4,
                   }}
                 >
@@ -232,16 +328,33 @@ export default function CartDetailScreen() {
           );
         })}
 
-        <Text style={styles.sectionTitle}>Instructions</Text>
-        <Surface style={styles.instructionCard} elevation={1}>
-          <Text style={styles.instructionText}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
+          Instructions
+        </Text>
+        <Surface
+          style={[
+            styles.instructionCard,
+            { backgroundColor: theme.colors.surface },
+          ]}
+          elevation={1}
+        >
+          <Text
+            style={[styles.instructionText, { color: theme.colors.onSurface }]}
+          >
             {recipe.instructions?.replace(/\\n/g, "\n")}
           </Text>
         </Surface>
 
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalLabel}>Total Cost</Text>
-          <Text style={styles.totalPrice}>
+        <View
+          style={[
+            styles.totalContainer,
+            { backgroundColor: theme.colors.surface },
+          ]}
+        >
+          <Text style={[styles.totalLabel, { color: theme.colors.onSurface }]}>
+            Total Cost
+          </Text>
+          <Text style={[styles.totalPrice, { color: theme.colors.primary }]}>
             $
             {ingredients
               .reduce(
@@ -253,9 +366,22 @@ export default function CartDetailScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.removeButton} onPress={handleRemoveAll}>
-          <Feather name="trash-2" size={20} color="#DC2626" />
-          <Text style={styles.removeButtonText}>Remove from Cart</Text>
+        <TouchableOpacity
+          style={[
+            styles.removeButton,
+            {
+              backgroundColor: theme.colors.errorContainer,
+              borderColor: theme.colors.error,
+            },
+          ]}
+          onPress={handleRemoveAll}
+        >
+          <Feather name="trash-2" size={20} color={theme.colors.error} />
+          <Text
+            style={[styles.removeButtonText, { color: theme.colors.error }]}
+          >
+            Remove from Cart
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -265,7 +391,6 @@ export default function CartDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
   },
   loadingContainer: {
     flex: 1,
@@ -284,7 +409,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 16,
-    backgroundColor: "#fff",
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -294,7 +418,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontWeight: "700",
-    color: "#1F2937",
     fontSize: 20,
   },
   content: {
@@ -304,7 +427,6 @@ const styles = StyleSheet.create({
   recipeCard: {
     flexDirection: "row",
     padding: 20,
-    backgroundColor: "#fff",
     borderRadius: 24,
     marginBottom: 28,
     alignItems: "center",
@@ -326,12 +448,10 @@ const styles = StyleSheet.create({
   recipeTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#111827",
     marginBottom: 6,
   },
   recipeCategory: {
     fontSize: 14,
-    color: "#DC2626",
     marginBottom: 8,
     fontWeight: "600",
     textTransform: "uppercase",
@@ -340,7 +460,6 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F3F4F6",
     alignSelf: "flex-start",
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -348,21 +467,18 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: "#4B5563",
     marginLeft: 6,
     fontWeight: "500",
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F2937",
     marginBottom: 16,
     marginLeft: 4,
   },
   ingredientRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     padding: 16,
     borderRadius: 16,
     marginBottom: 12,
@@ -377,13 +493,11 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 14,
-    backgroundColor: "#F9FAFB",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#F3F4F6",
   },
   ingredientImage: {
     width: "100%",
@@ -392,18 +506,14 @@ const styles = StyleSheet.create({
   ingredientName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1F2937",
     marginBottom: 2,
   },
   ingredientPrice: {
     fontSize: 13,
-    color: "#6B7280",
   },
   ingredientQuantity: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#4B5563",
-    backgroundColor: "#F3F4F6",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -411,7 +521,6 @@ const styles = StyleSheet.create({
   },
   instructionCard: {
     padding: 24,
-    backgroundColor: "#fff",
     borderRadius: 24,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -421,7 +530,6 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 15,
-    color: "#374151",
     lineHeight: 26,
   },
   removeButton: {
@@ -430,12 +538,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 18,
-    backgroundColor: "#FEF2F2",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#FECACA",
     marginBottom: 40,
-    shadowColor: "#DC2626",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -445,14 +551,12 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
     fontWeight: "700",
-    color: "#DC2626",
   },
   totalContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#fff",
     borderRadius: 16,
     marginTop: 24,
     shadowColor: "#000",
@@ -464,11 +568,9 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F2937",
   },
   totalPrice: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#DC2626",
   },
 });
