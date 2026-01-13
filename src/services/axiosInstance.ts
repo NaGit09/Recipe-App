@@ -1,68 +1,51 @@
 import axios from "axios";
 import { router } from "expo-router";
-import { ApiResponse } from "../types/api.type";
 import { StorageInstance } from "../utils/storage";
 
-const BASE_URL = process.env.BASE_URL;
-// define axiosInstance reuse for all api
+const BASE_URL = process.env.EXPO_PUBLIC_URL_BASE;
+
+// Tạo axios instance dùng chung
 const axiosInstance = axios.create({
   baseURL: BASE_URL || 'http://localhost:8080/recipe-app/api/v1',
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
   },
-})
+});
 
-
-// Interceptor grant token if request authentication
+// Request interceptor: gắn token nếu có
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const token = await StorageInstance.getItem('token')
+    const token = await StorageInstance.getItem('token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
+    return config;
   },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
+  (error) => Promise.reject(error)
+);
 
+// Response interceptor: dùng HTTP status, không check apiResponse.code
 axiosInstance.interceptors.response.use(
   (response) => {
-    const apiResponse = response.data as ApiResponse<any>
-
-    const isSuccess = apiResponse.code >= 200 && apiResponse.code < 300
-
-    if (isSuccess) {
-      return apiResponse.data
-    } else {
-      return Promise.reject({
-        isApiError: true,
-        code: apiResponse.code,
-        status: apiResponse.status,
-        message: apiResponse.message,
-      })
-    }
+    // HTTP status 2xx là success
+    // Nếu backend trả result thì lấy result, nếu không thì lấy toàn bộ data
+    return response.data?.result ?? response.data;
   },
-
   (error) => {
-    if (error.response) {
-      switch (error.response.status) {
-        case 401:
-          console.warn('Unauthorized! Redirecting to login...')
-          router.replace('/login')
-          break
-      }
+    // Xử lý 401 → redirect login
+    if (error.response?.status === 401) {
+      console.warn('Unauthorized! Redirecting to login...');
+      router.replace('/login');
     }
 
-    const errorResponse = {
+    // Tạo object lỗi chuẩn để FE xử lý
+    return Promise.reject({
       isApiError: true,
       code: error.response?.status || 500,
-      message:
-        error.response?.data?.message || error.message || 'Something went wrong !',
-    }
-    return Promise.reject(errorResponse)
+      message: error.response?.data?.message || error.message || 'Something went wrong!',
+    });
   }
-)
-export default axiosInstance
+);
+
+export default axiosInstance;
