@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/src/stores/auth.store";
 import { useCartStore } from "@/src/stores/cart.store";
 import { useRecipeStore } from "@/src/stores/recipe.store";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -13,13 +14,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ActivityIndicator, Text } from "react-native-paper";
+import { ActivityIndicator, Text, useTheme } from "react-native-paper";
 
 const { width } = Dimensions.get("window");
 
 const RecipeDetail = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const theme = useTheme();
+  const [quantities, setQuantities] = React.useState<{ [key: string]: number }>(
+    {}
+  );
   const {
     activeRecipe,
     getRecipeById,
@@ -29,6 +34,7 @@ const RecipeDetail = () => {
     favoriteRecipes,
   } = useRecipeStore();
   const { addToCart } = useCartStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     if (id && typeof id === "string") {
@@ -38,8 +44,13 @@ const RecipeDetail = () => {
 
   if (loading || !activeRecipe) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#DC2626" />
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -54,20 +65,46 @@ const RecipeDetail = () => {
     }
   };
 
-  const handleAddToCart = (item: any) => {
-    // Add to cart with full details
-    addToCart({
-      ingredientId: item.ingredient.id,
-      name: item.ingredient.name,
-      quantity: item.quantity,
-      unit: item.ingredient.unit,
-      price: item.ingredient.price || 0,
+  const updateQuantity = (ingredientId: string, change: number) => {
+    setQuantities((prev) => {
+      const current = prev[ingredientId] ?? 0;
+      // Get base quantity from recipe if not in state yet
+      const baseRaw = activeRecipe?.ingredients.find(
+        (i) => i.ingredient.id === ingredientId
+      )?.quantity;
+      const base = baseRaw ?? 0;
+      const startValue = current === 0 ? base : current;
+
+      const newValue = Math.max(1, startValue + change);
+      return { ...prev, [ingredientId]: newValue };
     });
-    Alert.alert("Added", `${item.ingredient.name} added to cart!`);
+  };
+
+  const handleAddAllToCart = async () => {
+    if (!user?.id || !activeRecipe) {
+      Alert.alert("Error", "Please login to add to cart");
+      return;
+    }
+
+    const ingredientsPayload = activeRecipe.ingredients.map((item) => ({
+      id: item.ingredient.id,
+      quantity: quantities[item.ingredient.id] ?? item.quantity,
+    }));
+
+    const req = {
+      recipeId: activeRecipe.id,
+      quantity: 1,
+      ingredients: ingredientsPayload,
+    };
+
+    await addToCart(user.id, req);
+    Alert.alert("Success", "All ingredients added to cart!");
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <StatusBar barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -95,14 +132,21 @@ const RecipeDetail = () => {
               <MaterialCommunityIcons
                 name={isFavorite ? "heart" : "heart-outline"}
                 size={24}
-                color={isFavorite ? "#DC2626" : "#fff"}
+                color={isFavorite ? theme.colors.error : "#fff"}
               />
             </TouchableOpacity>
           </View>
 
           <View style={styles.headerContent}>
-            <View style={styles.categoryBadge}>
-              <Text style={styles.categoryText}>
+            <View
+              style={[
+                styles.categoryBadge,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            >
+              <Text
+                style={[styles.categoryText, { color: theme.colors.onPrimary }]}
+              >
                 {activeRecipe.category?.name}
               </Text>
             </View>
@@ -117,60 +161,195 @@ const RecipeDetail = () => {
           </View>
         </View>
 
-        <View style={styles.contentContainer}>
-          <Text style={styles.description}>{activeRecipe.description}</Text>
+        <View
+          style={[
+            styles.contentContainer,
+            { backgroundColor: theme.colors.surface },
+          ]}
+        >
+          <Text
+            style={[
+              styles.description,
+              { color: theme.colors.onSurfaceVariant },
+            ]}
+          >
+            {activeRecipe.description}
+          </Text>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
+            <Text
+              style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+            >
+              Ingredients
+            </Text>
             <View style={styles.ingredientsList}>
-              {activeRecipe.ingredients.map((item, index) => (
-                <View key={index} style={styles.ingredientItem}>
-                  <View style={styles.ingredientIcon}>
-                    <MaterialCommunityIcons
-                      name="food-apple-outline"
-                      size={20}
-                      color="#DC2626"
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.ingredientName}>
+              {activeRecipe.ingredients.map((item, index) => {
+                const currentQty =
+                  quantities[item.ingredient.id] ?? item.quantity;
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      styles.ingredientItem,
+                      {
+                        backgroundColor: theme.colors.surface,
+                        borderColor: theme.colors.outlineVariant,
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.ingredientIcon,
+                        { backgroundColor: theme.colors.surfaceVariant },
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name="food-apple-outline"
+                        size={20}
+                        color={theme.colors.primary}
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.ingredientName,
+                        { color: theme.colors.onSurface },
+                      ]}
+                    >
                       {item.ingredient.name}
                     </Text>
-                    <Text style={styles.ingredientQuantity}>
-                      {item.quantity} {item.ingredient.unit}
-                    </Text>
+                    {/* Quantity Control */}
+                    <View
+                      style={[
+                        styles.quantityContainer,
+                        {
+                          backgroundColor: theme.colors.surfaceVariant,
+                          borderColor: theme.colors.outlineVariant,
+                        },
+                      ]}
+                    >
+                      <TouchableOpacity
+                        onPress={() => updateQuantity(item.ingredient.id, -1)}
+                        style={[
+                          styles.qtyBtn,
+                          { backgroundColor: theme.colors.surface },
+                        ]}
+                      >
+                        <Feather
+                          name="minus"
+                          size={14}
+                          color={theme.colors.onSurfaceVariant}
+                        />
+                      </TouchableOpacity>
+                      <Text
+                        style={[
+                          styles.quantityValue,
+                          { color: theme.colors.onSurface },
+                        ]}
+                      >
+                        {currentQty} {item.ingredient.unit}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => updateQuantity(item.ingredient.id, 1)}
+                        style={[
+                          styles.qtyBtn,
+                          { backgroundColor: theme.colors.surface },
+                        ]}
+                      >
+                        <Feather
+                          name="plus"
+                          size={14}
+                          color={theme.colors.onSurfaceVariant}
+                        />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <TouchableOpacity
-                    onPress={() => handleAddToCart(item)}
-                    style={styles.addToCartBtn}
-                  >
-                    <Feather name="plus" size={18} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              ))}
+                );
+              })}
             </View>
+            <TouchableOpacity
+              style={[
+                styles.addAllButton,
+                {
+                  backgroundColor: theme.colors.primary,
+                  shadowColor: theme.colors.primary,
+                },
+              ]}
+              onPress={handleAddAllToCart}
+            >
+              <Feather
+                name="shopping-cart"
+                size={20}
+                color={theme.colors.onPrimary}
+              />
+              <Text
+                style={[styles.addAllText, { color: theme.colors.onPrimary }]}
+              >
+                Add Ingredients to Cart
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Instructions</Text>
-            <View style={styles.instructionsContainer}>
-              <Text style={styles.instructionText}>
-                {activeRecipe.instructions}
+            <Text
+              style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+            >
+              Instructions
+            </Text>
+            <View
+              style={[
+                styles.instructionsContainer,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.instructionText,
+                  { color: theme.colors.onSurface },
+                ]}
+              >
+                {activeRecipe.instructions?.replace(/\\n/g, "\n")}
               </Text>
             </View>
           </View>
 
           {activeRecipe.nutritions.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Nutrition</Text>
+              <Text
+                style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+              >
+                Nutrition
+              </Text>
               <View style={styles.nutritionGrid}>
                 {activeRecipe.nutritions.map((item, index) => (
-                  <View key={index} style={styles.nutritionItem}>
-                    <Text style={styles.nutritionValue}>{item.value}</Text>
-                    <Text style={styles.nutritionUnit}>
+                  <View
+                    key={index}
+                    style={[
+                      styles.nutritionItem,
+                      { backgroundColor: theme.colors.primaryContainer },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.nutritionValue,
+                        { color: theme.colors.primary },
+                      ]}
+                    >
+                      {item.value}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.nutritionUnit,
+                        { color: theme.colors.primary },
+                      ]}
+                    >
                       {item.nutrition.unit}
                     </Text>
-                    <Text style={styles.nutritionName}>
+                    <Text
+                      style={[
+                        styles.nutritionName,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
                       {item.nutrition.name}
                     </Text>
                   </View>
@@ -181,21 +360,41 @@ const RecipeDetail = () => {
 
           {/* Author Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About the Author</Text>
-            <View style={styles.authorCard}>
+            <Text
+              style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+            >
+              About the Author
+            </Text>
+            <View
+              style={[
+                styles.authorCard,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
+            >
               <Image
                 source={{
                   uri:
                     activeRecipe.author?.avatar ||
                     "https://via.placeholder.com/50",
                 }}
-                style={styles.authorAvatar}
+                style={[
+                  styles.authorAvatar,
+                  { backgroundColor: theme.colors.surface },
+                ]}
               />
               <View style={styles.authorInfo}>
-                <Text style={styles.authorName}>
+                <Text
+                  style={[styles.authorName, { color: theme.colors.onSurface }]}
+                >
                   {activeRecipe.author?.username || "Unknown Chef"}
                 </Text>
-                <Text style={styles.authorBio} numberOfLines={2}>
+                <Text
+                  style={[
+                    styles.authorBio,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                  numberOfLines={2}
+                >
                   {activeRecipe.author?.bio ||
                     "Passionate about cooking and sharing delicious recipes."}
                 </Text>
@@ -204,7 +403,9 @@ const RecipeDetail = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
+            <Text
+              style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+            >
               More from {activeRecipe.author?.username || "Author"}
             </Text>
             <ScrollView
@@ -213,14 +414,25 @@ const RecipeDetail = () => {
               contentContainerStyle={styles.relatedRecipesList}
             >
               <View style={styles.relatedRecipeCard}>
-                <View style={styles.relatedRecipeImagePlaceholder}>
+                <View
+                  style={[
+                    styles.relatedRecipeImagePlaceholder,
+                    { backgroundColor: theme.colors.surfaceVariant },
+                  ]}
+                >
                   <MaterialCommunityIcons
                     name="chef-hat"
                     size={24}
-                    color="#aaa"
+                    color={theme.colors.onSurfaceVariant}
                   />
                 </View>
-                <Text style={styles.relatedRecipeTitle} numberOfLines={1}>
+                <Text
+                  style={[
+                    styles.relatedRecipeTitle,
+                    { color: theme.colors.onSurface },
+                  ]}
+                  numberOfLines={1}
+                >
                   Coming Soon
                 </Text>
               </View>
@@ -235,7 +447,6 @@ const RecipeDetail = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   loadingContainer: {
     flex: 1,
@@ -283,7 +494,6 @@ const styles = StyleSheet.create({
     right: 20,
   },
   categoryBadge: {
-    backgroundColor: "#DC2626",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -291,7 +501,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   categoryText: {
-    color: "#fff",
     fontSize: 12,
     fontWeight: "bold",
   },
@@ -316,7 +525,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   contentContainer: {
-    backgroundColor: "#fff",
     marginTop: -20,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
@@ -324,7 +532,6 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    color: "#666",
     lineHeight: 24,
     marginBottom: 30,
   },
@@ -334,7 +541,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
     marginBottom: 16,
   },
   ingredientsList: {
@@ -343,44 +549,81 @@ const styles = StyleSheet.create({
   ingredientItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    padding: 12,
-    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    // Slight shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   ingredientIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: "#FEF2F2",
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 14,
   },
   ingredientName: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
-  },
-  ingredientQuantity: {
-    fontSize: 16,
-    color: "#666",
     fontWeight: "600",
+    marginRight: 8,
   },
-  addToCartBtn: {
-    backgroundColor: "#DC2626",
-    padding: 8,
-    borderRadius: 8,
-    marginLeft: 12,
+  quantityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  qtyBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    // Shadow for buttons
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  quantityValue: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginHorizontal: 12,
+    minWidth: 40,
+    textAlign: "center",
+  },
+  addAllButton: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  addAllText: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
   instructionsContainer: {
-    backgroundColor: "#F9FAFB",
     padding: 20,
     borderRadius: 16,
   },
   instructionText: {
     fontSize: 16,
-    color: "#444",
     lineHeight: 26,
   },
   nutritionGrid: {
@@ -390,7 +633,6 @@ const styles = StyleSheet.create({
   },
   nutritionItem: {
     width: "30%",
-    backgroundColor: "#F0F9FF", // Light blue bg
     padding: 12,
     borderRadius: 12,
     alignItems: "center",
@@ -399,21 +641,17 @@ const styles = StyleSheet.create({
   nutritionValue: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0284C7",
   },
   nutritionUnit: {
     fontSize: 12,
-    color: "#0284C7",
     marginBottom: 4,
   },
   nutritionName: {
     fontSize: 12,
-    color: "#64748B",
   },
   authorCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
     padding: 16,
     borderRadius: 16,
   },
@@ -422,7 +660,6 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     marginRight: 16,
-    backgroundColor: "#E5E7EB",
   },
   authorInfo: {
     flex: 1,
@@ -430,12 +667,10 @@ const styles = StyleSheet.create({
   authorName: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
     marginBottom: 4,
   },
   authorBio: {
     fontSize: 12,
-    color: "#666",
     lineHeight: 18,
   },
   relatedRecipesList: {
@@ -449,7 +684,6 @@ const styles = StyleSheet.create({
   relatedRecipeImagePlaceholder: {
     width: 140,
     height: 100,
-    backgroundColor: "#F3F4F6",
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
@@ -458,7 +692,6 @@ const styles = StyleSheet.create({
   relatedRecipeTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
   },
 });
 

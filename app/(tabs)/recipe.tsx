@@ -1,22 +1,22 @@
+import RecipeItem from "@/src/components/Recipe/RecipeItem";
 import { useRecipeStore } from "@/src/stores/recipe.store";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
   FlatList,
-  Image,
   RefreshControl,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from "react-native";
-import { ActivityIndicator, FAB, Text } from "react-native-paper";
+import { ActivityIndicator, FAB, Text, useTheme } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RecipeScreen() {
   const router = useRouter();
   const { recipes, getAllRecipes, loading } = useRecipeStore();
+  const theme = useTheme();
 
   useEffect(() => {
     getAllRecipes();
@@ -26,84 +26,76 @@ export default function RecipeScreen() {
     await getAllRecipes();
   };
 
-  const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => router.push(`/recipe/${item.id}`)}
-      activeOpacity={0.9}
-    >
-      <Image
-        source={{ uri: item.image || "https://via.placeholder.com/150" }}
-        style={styles.cardImage}
-      />
-      <View style={styles.cardContent}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.name}
-          </Text>
-          <View style={[styles.statusBadge, { backgroundColor: "#DEF7EC" }]}>
-            <Text style={[styles.statusText, { color: "#03543F" }]}>
-              {item.category?.name || "Recipe"}
-            </Text>
-          </View>
-        </View>
-
-        <Text style={styles.cardDescription} numberOfLines={2}>
-          {item.description}
-        </Text>
-
-        <View style={styles.cardFooter}>
-          <View style={styles.metaItem}>
-            <Feather name="clock" size={12} color="#6B7280" />
-            <Text style={styles.metaText}>{item.time} min</Text>
-          </View>
-          <Text style={styles.metaDivider}>•</Text>
-          <View style={styles.metaItem}>
-            <Ionicons name="person-outline" size={12} color="#6B7280" />
-            <Text style={styles.metaText}>
-              {item.author?.username || "Community"}
-            </Text>
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.headerTitle}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      edges={["top", "left", "right"]}
+    >
+      <StatusBar barStyle={theme.dark ? "light-content" : "dark-content"} />
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: theme.colors.surface,
+            borderBottomColor: theme.colors.outlineVariant,
+          },
+        ]}
+      >
+        <Text
+          variant="headlineMedium"
+          style={[styles.headerTitle, { color: theme.colors.onSurface }]}
+        >
           All Recipes
         </Text>
-        <Text variant="bodyMedium" style={styles.headerSubtitle}>
+        <Text
+          variant="bodyMedium"
+          style={[styles.headerSubtitle, { color: theme.colors.secondary }]}
+        >
           Discover delicious recipes from the community
         </Text>
       </View>
 
       {loading && recipes.length === 0 ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#DC2626" />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <FlatList
           data={recipes}
-          renderItem={renderItem}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
+          renderItem={({ item, index }) => (
+            <RecipeItem item={item} index={index} />
+          )}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
               refreshing={loading}
               onRefresh={onRefresh}
-              colors={["#DC2626"]}
+              colors={[theme.colors.primary]}
+              tintColor={theme.colors.primary}
             />
           }
           ListEmptyComponent={
             !loading ? (
               <View style={styles.emptyState}>
-                <Ionicons name="book-outline" size={60} color="#D1D5DB" />
-                <Text style={styles.emptyTitle}>No Recipes Found</Text>
-                <Text style={styles.emptySubtitle}>
+                <Ionicons
+                  name="book-outline"
+                  size={60}
+                  color={theme.colors.outline}
+                />
+                <Text
+                  style={[styles.emptyTitle, { color: theme.colors.onSurface }]}
+                >
+                  No Recipes Found
+                </Text>
+                <Text
+                  style={[
+                    styles.emptySubtitle,
+                    { color: theme.colors.secondary },
+                  ]}
+                >
                   Be the first to create one!
                 </Text>
               </View>
@@ -114,8 +106,8 @@ export default function RecipeScreen() {
 
       <FAB
         icon="plus"
-        style={styles.fab}
-        color="#fff"
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        color={theme.colors.onPrimary}
         onPress={() => router.push("/recipe/create")}
         label="Create Recipe"
       />
@@ -126,20 +118,15 @@ export default function RecipeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
   },
   header: {
     padding: 20,
-    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
   },
   headerTitle: {
     fontWeight: "bold",
-    color: "#111827",
   },
   headerSubtitle: {
-    color: "#6B7280",
     marginTop: 4,
   },
   loadingContainer: {
@@ -151,78 +138,14 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 80, // Space for FAB
   },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-  },
-  cardImage: {
-    width: "100%",
-    height: 150,
-    resizeMode: "cover",
-  },
-  cardContent: {
-    padding: 16,
-  },
-  cardHeader: {
-    flexDirection: "row",
+  columnWrapper: {
     justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#111827",
-    flex: 1,
-    marginRight: 8,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  cardDescription: {
-    fontSize: 14,
-    color: "#4B5563",
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  cardFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  metaText: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginLeft: 4,
-  },
-  metaDivider: {
-    color: "#D1D5DB",
-    marginHorizontal: 8,
   },
   fab: {
     position: "absolute",
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: "#DC2626",
   },
   emptyState: {
     alignItems: "center",
@@ -232,12 +155,10 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#374151",
     marginTop: 16,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: "#6B7280",
     marginTop: 4,
   },
 });
