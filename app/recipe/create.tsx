@@ -4,6 +4,7 @@ import { useNutritionStore } from "@/src/stores/nutrition.store";
 import { useRecipeStore } from "@/src/stores/recipe.store";
 import { Ingredient } from "@/src/types/ingredient.type";
 import { Nutrition } from "@/src/types/nutrition.type";
+import { RecipeReq } from "@/src/types/recipe.type";
 import { Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -147,7 +148,13 @@ export default function CreateRecipeScreen() {
         value: parseFloat(n.value) || 0,
       }));
 
-      const payload: any = {
+      // Handle Image
+      const filename = image.split("/").pop() || "photo.jpg";
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : `image/jpeg`;
+      const imagePayload = { uri: image, name: filename, type };
+
+      const payload: RecipeReq = {
         name,
         description,
         time: parseInt(time) || 0,
@@ -155,15 +162,8 @@ export default function CreateRecipeScreen() {
         instructions,
         ingredients: ingredientPayload,
         nutritions: nutritionPayload,
+        image: imagePayload,
       };
-
-      // Handle Image
-      if (image) {
-        const filename = image.split("/").pop();
-        const match = /\.(\w+)$/.exec(filename || "");
-        const type = match ? `image/${match[1]}` : `image`;
-        payload.image = { uri: image, name: filename, type } as any;
-      }
 
       const result = await createRecipe(payload);
       if (result) {

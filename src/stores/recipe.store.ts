@@ -1,4 +1,4 @@
-import { RecipeState } from "@/src/types/recipe.type";
+import { RecipeReq, RecipeState } from "@/src/types/recipe.type";
 import { create } from "zustand";
 import {
     addFavoriteRecipe,
@@ -71,12 +71,9 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
     },
 
     addFavoriteRecipe: async (recipeId: string) => {
-        // Optimistic update could be handled here if we had the recipe object,
-        // but for now we'll just refresh the favorites list.
         set({ loading: true, error: null });
         try {
             await addFavoriteRecipe(recipeId);
-            // Refresh favorites
             const favorites = await getMyFavoriteRecipes();
             set({ favoriteRecipes: favorites, loading: false });
         } catch (error: any) {
@@ -88,18 +85,18 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
         set({ loading: true, error: null });
         try {
             await removeFavoriteRecipe(recipeId);
-            // Refresh favorites
             const favorites = await getMyFavoriteRecipes();
             set({ favoriteRecipes: favorites, loading: false });
         } catch (error: any) {
             set({ error: error.message, loading: false });
         }
     },
-    createRecipe: async (data: any) => {
+
+    createRecipe: async (data: RecipeReq) => {
         set({ loading: true, error: null });
         try {
             await createRecipe(data);
-            await get().getMyRecipes(); // Refresh my recipes
+            await get().getMyRecipes();
             set({ loading: false });
             return true;
         } catch (error: any) {

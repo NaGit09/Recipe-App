@@ -1,6 +1,7 @@
 import { FadeInView } from "@/src/components/Animated/FadeInView";
 import RecipeItem from "@/src/components/Recipe/RecipeItem";
 import { useAuthStore } from "@/src/stores/auth.store";
+import { useCartStore } from "@/src/stores/cart.store";
 import { useCategoryStore } from "@/src/stores/category.store";
 import { useRecipeStore } from "@/src/stores/recipe.store";
 import { useSearchStore } from "@/src/stores/search.store";
@@ -27,13 +28,22 @@ export default function Index() {
   const { categories, getAllCategories } = useCategoryStore();
   const { recipes, getAllRecipes, loading: recipesLoading } = useRecipeStore();
   const { setActiveCategory, reset } = useSearchStore();
+  const { items: cartItems, fetchCart } = useCartStore();
 
   const username = user?.username || "Chef";
+
+  const totalCartItems = cartItems.reduce((acc, recipeItem) => {
+    // Sum up quantities of all ingredients in each recipe added to cart
+    return acc + recipeItem.items.reduce((sum, item) => sum + item.quantity, 0);
+  }, 0);
 
   useEffect(() => {
     getAllCategories();
     getAllRecipes();
-  }, []);
+    if (user?.id) {
+      fetchCart(user.id);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     const hours = new Date().getHours();
@@ -85,7 +95,7 @@ export default function Index() {
             ]}
             size={16}
           >
-            3
+            {totalCartItems}
           </Badge>
         </TouchableOpacity>
       </View>

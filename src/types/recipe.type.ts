@@ -32,5 +32,26 @@ export interface RecipeState {
     getMyFavoriteRecipes: () => Promise<void>;
     addFavoriteRecipe: (recipeId: string) => Promise<void>;
     removeFavoriteRecipe: (recipeId: string) => Promise<void>;
-    createRecipe: (data: any) => Promise<boolean>;
+    createRecipe: (data: RecipeReq) => Promise<boolean>;
+}
+
+export interface RecipeReq {
+    name: string;
+    description: string;
+    image: {
+        uri: string;
+        name: string;
+        type: string;
+    };
+    instructions: string;
+    time: number;
+    categoryId: string;
+    ingredients: {
+        ingredientId: string;
+        quantity: number;
+    }[];
+    nutritions: {
+        nutritionId: string;
+        value: number;
+    }[];
 }
