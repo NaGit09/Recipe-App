@@ -100,7 +100,12 @@ const ProfileScreen = () => {
           style={[styles.sheet, { backgroundColor: theme.colors.background }]}
         >
           <View style={styles.profileCardWrapper}>
-            <ProfileCart formData={formData} />
+            <ProfileCart
+              formData={formData}
+              onAvatarChange={(uri) =>
+                setFormData((prev) => ({ ...prev, avatar: uri }))
+              }
+            />
           </View>
 
           <View style={styles.sectionSpacer} />

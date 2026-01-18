@@ -1,12 +1,34 @@
 import { UserInfo } from "@/src/types/user.type";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import React from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Avatar, Surface, Text, useTheme } from "react-native-paper";
 const { width } = Dimensions.get("window");
 
-const ProfileCart = ({ formData }: { formData: Partial<UserInfo> }) => {
+interface ProfileCartProps {
+  formData: Partial<UserInfo>;
+  onAvatarChange?: (uri: string) => void;
+}
+
+const ProfileCart = ({ formData, onAvatarChange }: ProfileCartProps) => {
   const theme = useTheme();
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      if (onAvatarChange) {
+        onAvatarChange(result.assets[0].uri);
+      }
+    }
+  };
 
   return (
     <Surface
@@ -21,7 +43,8 @@ const ProfileCart = ({ formData }: { formData: Partial<UserInfo> }) => {
           }}
           style={{ backgroundColor: theme.colors.surfaceVariant }}
         />
-        <View
+        <TouchableOpacity
+          onPress={pickImage}
           style={[
             styles.editBadge,
             {
@@ -35,7 +58,7 @@ const ProfileCart = ({ formData }: { formData: Partial<UserInfo> }) => {
             size={16}
             color={theme.colors.onPrimary}
           />
-        </View>
+        </TouchableOpacity>
       </View>
 
       <Text
@@ -100,7 +123,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  avatarContainer: { marginBottom: 16 },
+  avatarContainer: { marginBottom: 16, position: "relative" },
   editBadge: {
     position: "absolute",
     bottom: 0,

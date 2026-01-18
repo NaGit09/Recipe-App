@@ -1,17 +1,22 @@
 import { UserInfo, UserState } from "@/src/types/user.type";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { updateProfile as updateProfileApi, getUserProfile as getProfileApi } from "../services/api/user.api";
+import {
+  getUserProfile as getProfileApi,
+  updateProfile as updateProfileApi,
+} from "../services/api/user.api";
 
 export const useUserStore = create(
   persist<UserState>(
     (set) => ({
       user: null,
       setUser: (user) => set({ user }),
-      
+
       updateProfile: async (user: UserInfo) => {
+        console.log(user);
         const result = await updateProfileApi(user);
+        console.log(result);
         set({ user: result });
         return result;
       },
@@ -25,6 +30,6 @@ export const useUserStore = create(
     {
       name: "user-storage",
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 );

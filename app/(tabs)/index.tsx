@@ -34,7 +34,10 @@ export default function Index() {
 
   const totalCartItems = cartItems.reduce((acc, recipeItem) => {
     // Sum up quantities of all ingredients in each recipe added to cart
-    return acc + recipeItem.items.reduce((sum, item) => sum + item.quantity, 0);
+    return (
+      acc +
+      (recipeItem.items || []).reduce((sum, item) => sum + item.quantity, 0)
+    );
   }, 0);
 
   useEffect(() => {
