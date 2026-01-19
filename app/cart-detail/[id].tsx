@@ -8,13 +8,13 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
 import { ActivityIndicator, Surface, Text, useTheme } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CartDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -90,7 +90,7 @@ export default function CartDetailScreen() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -360,7 +360,7 @@ export default function CartDetailScreen() {
               .reduce(
                 (sum, item) =>
                   sum + (item.ingredient?.price || 0) * item.quantity,
-                0
+                0,
               )
               .toFixed(2)}
           </Text>

@@ -105,6 +105,12 @@ export default function TabsLayout() {
           }}
         />
       ))}
+      <Tabs.Screen
+        name="favorite"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

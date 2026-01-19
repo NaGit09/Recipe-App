@@ -8,7 +8,6 @@ import {
   Alert,
   FlatList,
   Image,
-  SafeAreaView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -20,6 +19,7 @@ import {
   Text,
   useTheme,
 } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ShoppingCartScreen() {
   const router = useRouter();
@@ -36,7 +36,6 @@ export default function ShoppingCartScreen() {
 
   const handleRemoveRecipe = (cartItemDetail: CartItemDetail) => {
     if (!user?.id) return;
-    console.log("Attempting to remove recipe:", cartItemDetail.recipe.id);
 
     Alert.alert(
       "Remove Recipe",
@@ -47,7 +46,6 @@ export default function ShoppingCartScreen() {
           text: "Remove",
           style: "destructive",
           onPress: async () => {
-            console.log("Confirm remove recipe:", cartItemDetail.recipe.id);
             const req = {
               recipeId: cartItemDetail.recipe.id,
               quantity: 1,
@@ -59,12 +57,11 @@ export default function ShoppingCartScreen() {
             await removeFromCart(user.id, req);
           },
         },
-      ]
+      ],
     );
   };
 
   const handleCheckout = () => {
-    console.log("Navigating to checkout...");
     router.push("/checkout");
   };
 
@@ -127,7 +124,7 @@ export default function ShoppingCartScreen() {
 
   const totalItems = items.reduce(
     (acc, recipe) => acc + (recipe.items?.length || 0),
-    0
+    0,
   );
 
   if (isLoading && items.length === 0) {

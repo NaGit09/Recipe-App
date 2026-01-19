@@ -2,14 +2,9 @@ import NotificationCard from "@/src/components/Notification/NotificationCard";
 import { useNotificationStore } from "@/src/stores/notification.store";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import {
-  FlatList,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  View,
-} from "react-native";
+import { FlatList, StatusBar, StyleSheet, View } from "react-native";
 import { IconButton, Text, useTheme } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationScreen() {
   const { notifications, markAllAsRead } = useNotificationStore();

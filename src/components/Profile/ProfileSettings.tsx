@@ -1,10 +1,12 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { Surface, useTheme } from "react-native-paper";
 import { ThemeSelector } from "./ThemeSelector";
 
 const ProfileSettings = () => {
+  const router = useRouter();
   const [notifications, setNotifications] = useState(true);
   const [themeModalVisible, setThemeModalVisible] = useState(false);
   const theme = useTheme();
@@ -14,7 +16,7 @@ const ProfileSettings = () => {
     label: string,
     value: boolean,
     onPress: () => void,
-    isSwitch: boolean = true
+    isSwitch: boolean = true,
   ) => (
     <TouchableOpacity
       style={styles.settingItem}
@@ -64,39 +66,51 @@ const ProfileSettings = () => {
         style={[styles.card, { backgroundColor: theme.colors.surface }]}
         elevation={1}
       >
-        {renderSettingItem(
-          "bell-outline",
-          "Push Notifications",
-          notifications,
-          () => setNotifications(!notifications)
-        )}
-        <View style={styles.divider} />
+        <View style={styles.cardContent}>
+          {renderSettingItem(
+            "bell-outline",
+            "Push Notifications",
+            notifications,
+            () => setNotifications(!notifications),
+          )}
+          <View style={styles.divider} />
 
-        {/* Theme Selector Entry */}
-        {renderSettingItem(
-          "palette-outline",
-          "App Theme",
-          false,
-          () => setThemeModalVisible(true),
-          false
-        )}
+          {/* Favorites Entry */}
+          {renderSettingItem(
+            "heart-outline",
+            "Favorite Recipes",
+            false,
+            () => router.push("/favorite"),
+            false,
+          )}
+          <View style={styles.divider} />
 
-        <View style={styles.divider} />
-        {renderSettingItem(
-          "shield-check-outline",
-          "Privacy & Security",
-          false,
-          () => {},
-          false
-        )}
-        <View style={styles.divider} />
-        {renderSettingItem(
-          "help-circle-outline",
-          "Help & Support",
-          false,
-          () => {},
-          false
-        )}
+          {/* Theme Selector Entry */}
+          {renderSettingItem(
+            "palette-outline",
+            "App Theme",
+            false,
+            () => setThemeModalVisible(true),
+            false,
+          )}
+
+          <View style={styles.divider} />
+          {renderSettingItem(
+            "shield-check-outline",
+            "Privacy & Security",
+            false,
+            () => {},
+            false,
+          )}
+          <View style={styles.divider} />
+          {renderSettingItem(
+            "help-circle-outline",
+            "Help & Support",
+            false,
+            () => {},
+            false,
+          )}
+        </View>
       </Surface>
 
       <ThemeSelector
@@ -117,6 +131,9 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   card: {
+    borderRadius: 16,
+  },
+  cardContent: {
     borderRadius: 16,
     overflow: "hidden",
   },

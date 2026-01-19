@@ -14,9 +14,7 @@ export const useUserStore = create(
       setUser: (user) => set({ user }),
 
       updateProfile: async (user: UserInfo) => {
-        console.log(user);
         const result = await updateProfileApi(user);
-        console.log(result);
         set({ user: result });
         return result;
       },

@@ -1,3 +1,4 @@
+import { useRecipeStore } from "@/src/stores/recipe.store";
 import { Recipe } from "@/src/types/recipe.type";
 import { handleRecipePress } from "@/src/utils/helper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -8,6 +9,18 @@ import { FadeInView } from "../Animated/FadeInView";
 
 const RecipeItem = ({ item, index }: { item: Recipe; index: number }) => {
   const theme = useTheme();
+  const { favoriteRecipes, addFavoriteRecipe, removeFavoriteRecipe } =
+    useRecipeStore();
+
+  const isFavorite = favoriteRecipes.some((fav) => fav.id === item.id);
+
+  const toggleFavorite = async () => {
+    if (isFavorite) {
+      await removeFavoriteRecipe(item.id);
+    } else {
+      await addFavoriteRecipe(item.id);
+    }
+  };
 
   return (
     <FadeInView
@@ -42,11 +55,12 @@ const RecipeItem = ({ item, index }: { item: Recipe; index: number }) => {
               styles.likeButton,
               { backgroundColor: theme.colors.surface },
             ]}
+            onPress={toggleFavorite}
           >
             <MaterialCommunityIcons
-              name="heart-outline"
+              name={isFavorite ? "heart" : "heart-outline"}
               size={20}
-              color={theme.colors.primary}
+              color={isFavorite ? "red" : theme.colors.primary}
             />
           </TouchableOpacity>
         </View>

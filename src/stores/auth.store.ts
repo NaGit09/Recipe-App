@@ -65,40 +65,41 @@ export const useAuthStore = create(
 
         try {
           set({ isLoading: true });
-          const { email, password } = dto
-          console.log("Login attempt:", email, password)
+          const { email, password } = dto;
+
           const authResponse = await loginApi(dto);
 
           const { user, token } = authResponse;
 
           if (!user || !token) {
-            console.error("Login failed: Missing user or token in response", authResponse);
+            console.error(
+              "Login failed: Missing user or token in response",
+              authResponse,
+            );
             set({ isLoading: false });
             return false;
           }
 
-
-          await StorageInstance.setItem('token', token);
-          await StorageInstance.setItem('user', JSON.stringify(user));
+          await StorageInstance.setItem("token", token);
+          await StorageInstance.setItem("user", JSON.stringify(user));
 
           get().setAuth(user, token);
           set({ isLoading: false });
           return true;
-
         } catch (error) {
           console.error("Login error caught in store:", error);
           const apiError = error as ApiError;
           if (apiError.isApiError) {
             // ensure we are logging what we think we are logging
             console.error(
-              `Error code: ${apiError.status}, Message: ${apiError.message}`
+              `Error code: ${apiError.status}, Message: ${apiError.message}`,
             );
           }
           set({ isLoading: false });
           return false;
         }
       },
-      // Handle logout 
+      // Handle logout
       logout: async () => {
         set({ user: null, token: null });
         await StorageInstance.removeItem("token");
@@ -117,6 +118,6 @@ export const useAuthStore = create(
           });
         }
       },
-    }
-  )
+    },
+  ),
 );

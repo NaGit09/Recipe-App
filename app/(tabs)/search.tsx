@@ -27,9 +27,9 @@ const Search = () => {
 
   useEffect(() => {
     if (activeCategory === "All") {
-      getAllRecipes();
+      getAllRecipes(0, 10);
     } else {
-      getRecipesByCategoryId(activeCategory);
+      getRecipesByCategoryId(activeCategory, 0, 10);
     }
   }, [activeCategory]);
 

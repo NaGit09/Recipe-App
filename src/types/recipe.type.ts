@@ -23,11 +23,18 @@ export interface RecipeState {
     favoriteRecipes: Recipe[];
     loading: boolean;
     error: string | null;
+    currentPage: number;
+    totalPages: number;
+    hasMore: boolean;
 
     setRecipes: (recipes: Recipe[]) => void;
-    getAllRecipes: () => Promise<void>;
+    getAllRecipes: (page: number, size: number) => Promise<void>;
     getRecipeById: (id: string) => Promise<void>;
-    getRecipesByCategoryId: (categoryId: string) => Promise<void>;
+    getRecipesByCategoryId: (
+        categoryId: string,
+        page: number,
+        size: number,
+    ) => Promise<void>;
     getMyRecipes: () => Promise<void>;
     getMyFavoriteRecipes: () => Promise<void>;
     addFavoriteRecipe: (recipeId: string) => Promise<void>;
@@ -54,4 +61,33 @@ export interface RecipeReq {
         nutritionId: string;
         value: number;
     }[];
+}
+
+export interface RecipePagination {
+    content: Recipe[];
+    pageable: {
+        pageNumber: number;
+        pageSize: number;
+        sort: {
+            sorted: boolean;
+            unsorted: boolean;
+            empty: boolean;
+        };
+        offset: number;
+        paged: boolean;
+        unpaged: boolean;
+    };
+    totalElements: number;
+    totalPages: number;
+    last: boolean;
+    number: number;
+    size: number;
+    sort: {
+        sorted: boolean;
+        unsorted: boolean;
+        empty: boolean;
+    };
+    numberOfElements: number;
+    first: boolean;
+    empty: boolean;
 }

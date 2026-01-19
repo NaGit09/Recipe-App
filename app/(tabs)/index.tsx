@@ -12,6 +12,8 @@ import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -26,7 +28,14 @@ export default function Index() {
   const [greeting, setGreeting] = useState("");
   const { user } = useAuthStore();
   const { categories, getAllCategories } = useCategoryStore();
-  const { recipes, getAllRecipes, loading: recipesLoading } = useRecipeStore();
+  const {
+    recipes,
+    getAllRecipes,
+    getMyFavoriteRecipes,
+    loading: recipesLoading,
+    currentPage,
+    hasMore,
+  } = useRecipeStore();
   const { setActiveCategory, reset } = useSearchStore();
   const { items: cartItems, fetchCart } = useCartStore();
 
@@ -42,9 +51,10 @@ export default function Index() {
 
   useEffect(() => {
     getAllCategories();
-    getAllRecipes();
+    getAllRecipes(0, 10);
     if (user?.id) {
       fetchCart(user.id);
+      getMyFavoriteRecipes();
     }
   }, [user?.id]);
 
@@ -55,7 +65,19 @@ export default function Index() {
     else setGreeting("Good Evening");
   }, []);
 
-  const popularRecipes = recipes.slice(0, 4);
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    const paddingToBottom = 20;
+    const isCloseToBottom =
+      layoutMeasurement.height + contentOffset.y >=
+      contentSize.height - paddingToBottom;
+
+    if (isCloseToBottom && hasMore && !recipesLoading) {
+      getAllRecipes(currentPage + 1, 10);
+    }
+  };
+
+  const popularRecipes = recipes;
 
   return (
     <SafeAreaView
@@ -106,6 +128,8 @@ export default function Index() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         {/* Banner Section */}
         <FadeInView delay={200} duration={600}>
@@ -180,26 +204,27 @@ export default function Index() {
           </View>
         </FadeInView>
 
-        {recipesLoading && recipes.length === 0 ? (
+        <View style={styles.recipesGrid}>
+          {popularRecipes.map((item, index) => (
+            <RecipeItem key={item.id} item={item} index={index} />
+          ))}
+          {popularRecipes.length === 0 && !recipesLoading && (
+            <Text
+              style={{
+                textAlign: "center",
+                width: "100%",
+                color: theme.colors.secondary,
+                marginTop: 20,
+              }}
+            >
+              No recipes found.
+            </Text>
+          )}
+        </View>
+
+        {recipesLoading && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color={theme.colors.primary} />
-          </View>
-        ) : (
-          <View style={styles.recipesGrid}>
-            {popularRecipes.map((item, index) => (
-              <RecipeItem key={item.id} item={item} index={index} />
-            ))}
-            {popularRecipes.length === 0 && !recipesLoading && (
-              <Text
-                style={{
-                  textAlign: "center",
-                  width: "100%",
-                  color: theme.colors.secondary,
-                }}
-              >
-                No recipes found.
-              </Text>
-            )}
           </View>
         )}
       </ScrollView>

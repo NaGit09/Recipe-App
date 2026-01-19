@@ -1,3 +1,4 @@
+import { useRecipeStore } from "@/src/stores/recipe.store";
 import { Recipe } from "@/src/types/recipe.type";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -9,7 +10,20 @@ import { FadeInView } from "../Animated/FadeInView";
 
 const RecipeCard = ({ item, index }: { item: Recipe; index: number }) => {
   const router = useRouter();
+  const { favoriteRecipes, addFavoriteRecipe, removeFavoriteRecipe } =
+    useRecipeStore();
   const theme = useTheme();
+
+  const isFavorite = favoriteRecipes.some((fav) => fav.id === item.id);
+
+  const toggleFavorite = async (e: any) => {
+    e.stopPropagation();
+    if (isFavorite) {
+      await removeFavoriteRecipe(item.id);
+    } else {
+      await addFavoriteRecipe(item.id);
+    }
+  };
 
   return (
     <FadeInView
@@ -38,11 +52,12 @@ const RecipeCard = ({ item, index }: { item: Recipe; index: number }) => {
               styles.likeButton,
               { backgroundColor: theme.colors.surface },
             ]}
+            onPress={toggleFavorite}
           >
             <Ionicons
-              name="heart-outline"
+              name={isFavorite ? "heart" : "heart-outline"}
               size={20}
-              color={theme.colors.primary}
+              color={isFavorite ? "red" : theme.colors.primary}
             />
           </TouchableOpacity>
         </View>

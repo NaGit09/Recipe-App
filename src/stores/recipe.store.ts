@@ -18,13 +18,31 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
     favoriteRecipes: [],
     loading: false,
     error: null,
+    currentPage: 0,
+    totalPages: 1,
+    hasMore: true,
     setRecipes: (recipes) => set({ recipes }),
 
-    getAllRecipes: async () => {
+    getAllRecipes: async (page: number, size: number) => {
         set({ loading: true, error: null });
         try {
-            const result = await getAllRecipes();
-            set({ recipes: result, loading: false });
+            const result = await getAllRecipes(page, size);
+
+            set((state) => {
+                const uniqueNewContent = result.content.filter(
+                    (newRecipe) => !state.recipes.some((r) => r.id === newRecipe.id),
+                );
+                return {
+                    recipes:
+                        page === 0
+                            ? result.content
+                            : [...state.recipes, ...uniqueNewContent],
+                    loading: false,
+                    currentPage: result.number,
+                    totalPages: result.totalPages,
+                    hasMore: !result.last,
+                };
+            });
         } catch (error: any) {
             set({ error: error.message, loading: false });
         }
@@ -40,11 +58,30 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
         }
     },
 
-    getRecipesByCategoryId: async (categoryId: string) => {
+    getRecipesByCategoryId: async (
+        categoryId: string,
+        page: number,
+        size: number,
+    ) => {
         set({ loading: true, error: null });
         try {
-            const result = await getRecipesByCategoryId(categoryId);
-            set({ recipes: result, loading: false });
+            const result = await getRecipesByCategoryId(categoryId, page, size);
+
+            set((state) => {
+                const uniqueNewContent = result.content.filter(
+                    (newRecipe) => !state.recipes.some((r) => r.id === newRecipe.id),
+                );
+                return {
+                    recipes:
+                        page === 0
+                            ? result.content
+                            : [...state.recipes, ...uniqueNewContent],
+                    loading: false,
+                    currentPage: result.number,
+                    totalPages: result.totalPages,
+                    hasMore: !result.last,
+                };
+            });
         } catch (error: any) {
             set({ error: error.message, loading: false });
         }

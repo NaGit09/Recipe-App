@@ -1,16 +1,25 @@
-import { Recipe } from "@/src/types/recipe.type";
+import { Recipe, RecipePagination } from "@/src/types/recipe.type";
 import axiosInstance from "../axiosInstance";
 
-export const getAllRecipes = (): Promise<Recipe[]> => {
-    return axiosInstance.get(`/recipes`);
+export const getAllRecipes = (
+    page: number,
+    size: number,
+): Promise<RecipePagination> => {
+    return axiosInstance.get(`/recipes?page=${page}&size=${size}`);
 };
 
 export const getRecipeById = (id: string): Promise<Recipe> => {
     return axiosInstance.get(`/recipes/${id}`);
 };
 
-export const getRecipesByCategoryId = (categoryId: string): Promise<Recipe[]> => {
-    return axiosInstance.get(`/recipes/${categoryId}/category`);
+export const getRecipesByCategoryId = (
+    categoryId: string,
+    page: number,
+    size: number,
+): Promise<RecipePagination> => {
+    return axiosInstance.get(
+        `/recipes/${categoryId}/category?page=${page}&size=${size}`,
+    );
 };
 
 export const getMyRecipes = (): Promise<Recipe[]> => {
@@ -34,12 +43,18 @@ export const createRecipe = async (data: any): Promise<Recipe> => {
     Object.keys(data).forEach((key) => {
         const value = data[key];
         if (value !== undefined && value !== null) {
-            if (key === 'ingredients' && Array.isArray(value)) {
+            if (key === "ingredients" && Array.isArray(value)) {
                 value.forEach((item: any, index: number) => {
-                    formData.append(`ingredients[${index}].ingredientId`, item.ingredientId);
-                    formData.append(`ingredients[${index}].quantity`, item.quantity.toString());
+                    formData.append(
+                        `ingredients[${index}].ingredientId`,
+                        item.ingredientId,
+                    );
+                    formData.append(
+                        `ingredients[${index}].quantity`,
+                        item.quantity.toString(),
+                    );
                 });
-            } else if (key === 'nutritions' && Array.isArray(value)) {
+            } else if (key === "nutritions" && Array.isArray(value)) {
                 value.forEach((item: any, index: number) => {
                     formData.append(`nutritions[${index}].nutritionId`, item.nutritionId);
                     formData.append(`nutritions[${index}].value`, item.value.toString());
@@ -56,4 +71,3 @@ export const createRecipe = async (data: any): Promise<Recipe> => {
         },
     });
 };
-

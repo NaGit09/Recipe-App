@@ -11,9 +11,26 @@ interface SearchResultProps {
 }
 
 const SearchResult = ({ ListHeaderComponent }: SearchResultProps) => {
-  const { recipes, loading: loadingRecipes } = useRecipeStore();
+  const {
+    recipes,
+    loading: loadingRecipes,
+    getAllRecipes,
+    getRecipesByCategoryId,
+    currentPage,
+    hasMore,
+  } = useRecipeStore();
   const { keyword, activeCategory } = useSearchStore();
   const theme = useTheme();
+
+  const handleScroll = () => {
+    if (loadingRecipes || !hasMore) return;
+
+    if (activeCategory === "All") {
+      getAllRecipes(currentPage + 1, 10);
+    } else {
+      getRecipesByCategoryId(activeCategory, currentPage + 1, 10);
+    }
+  };
 
   const filteredRecipes = useMemo(() => {
     let result = recipes;
@@ -27,7 +44,7 @@ const SearchResult = ({ ListHeaderComponent }: SearchResultProps) => {
       result = result.filter(
         (r) =>
           r.name.toLowerCase().includes(lower) ||
-          r.description.toLowerCase().includes(lower)
+          r.description.toLowerCase().includes(lower),
       );
     }
 
@@ -38,7 +55,7 @@ const SearchResult = ({ ListHeaderComponent }: SearchResultProps) => {
     <FlatList
       data={filteredRecipes}
       renderItem={({ item, index }) => <RecipeCard index={index} item={item} />}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => item.id || `recipe-${index}`}
       numColumns={2}
       columnWrapperStyle={styles.columnWrapper}
       contentContainerStyle={styles.listContent}
@@ -68,6 +85,8 @@ const SearchResult = ({ ListHeaderComponent }: SearchResultProps) => {
         )
       }
       showsVerticalScrollIndicator={false}
+      onEndReached={handleScroll}
+      onEndReachedThreshold={0.5}
     />
   );
 };

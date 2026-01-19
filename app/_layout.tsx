@@ -22,7 +22,7 @@ export default function RootLayout() {
     if (!isReady) return;
     const checkFirstLaunch = async () => {
       const isFirstLaunch = await StorageInstance.getItem("isFirstLaunch");
-      console.log("isFirstLaunch", isFirstLaunch);
+
       if (isFirstLaunch === null) {
         router.replace("/welcome");
       } else if (!token) {
