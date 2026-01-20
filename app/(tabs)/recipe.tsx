@@ -19,11 +19,11 @@ export default function RecipeScreen() {
   const theme = useTheme();
 
   useEffect(() => {
-    getAllRecipes();
+    getAllRecipes(0,20);
   }, []);
 
   const onRefresh = async () => {
-    await getAllRecipes();
+    await getAllRecipes(0,20);
   };
 
   return (

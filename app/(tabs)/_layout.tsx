@@ -1,11 +1,21 @@
+import { useAuthStore } from "@/src/stores/auth.store"; // Import auth store
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { Tabs } from "expo-router";
-import React from "react";
+import { Tabs, useRouter } from "expo-router"; // Import useRouter
+import React, { useEffect } from "react";
 import { useTheme } from "react-native-paper";
 
 export default function TabsLayout() {
   const theme = useTheme();
+  const router = useRouter(); // Initialize router
+  const { user } = useAuthStore(); // Check user role
+
+  useEffect(() => {
+    if (user?.role === "ADMIN") {
+      router.replace("/admin");
+    }
+  }, [user]);
+
   type FontAwesomeName = React.ComponentProps<typeof FontAwesome>["name"];
   type MaterialCommunityName = React.ComponentProps<
     typeof MaterialCommunityIcons

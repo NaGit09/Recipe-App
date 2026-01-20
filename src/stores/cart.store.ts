@@ -27,9 +27,16 @@ export const useCartStore = create(
                     } else {
                         set({ items: [], isLoading: false });
                     }
-
                 } catch (error: any) {
-                    set({ isLoading: false, error: error.message || "Failed to fetch cart" });
+                    if (error?.message === "Access Denied" || error?.code === 500) {
+                        // Likely admin or insufficient permissions, just clear cart
+                        set({ items: [], isLoading: false, error: null });
+                        return;
+                    }
+                    set({
+                        isLoading: false,
+                        error: error.message || "Failed to fetch cart",
+                    });
                     console.error("Fetch cart error:", error);
                 }
             },
@@ -40,7 +47,10 @@ export const useCartStore = create(
                     await addCart(userId, req);
                     await get().fetchCart(userId);
                 } catch (error: any) {
-                    set({ isLoading: false, error: error.message || "Failed to add to cart" });
+                    set({
+                        isLoading: false,
+                        error: error.message || "Failed to add to cart",
+                    });
                     console.error("Add to cart error:", error);
                 }
             },
@@ -55,7 +65,10 @@ export const useCartStore = create(
                         await get().fetchCart(userId);
                     }
                 } catch (error: any) {
-                    set({ isLoading: false, error: error.message || "Failed to remove from cart" });
+                    set({
+                        isLoading: false,
+                        error: error.message || "Failed to remove from cart",
+                    });
                     console.error("Remove from cart error:", error);
                 }
             },
@@ -70,7 +83,10 @@ export const useCartStore = create(
                         await get().fetchCart(userId);
                     }
                 } catch (error: any) {
-                    set({ isLoading: false, error: error.message || "Failed to update cart" });
+                    set({
+                        isLoading: false,
+                        error: error.message || "Failed to update cart",
+                    });
                     console.error("Update cart error:", error);
                 }
             },
@@ -80,6 +96,6 @@ export const useCartStore = create(
         {
             name: "cart-storage",
             storage: createJSONStorage(() => AsyncStorage),
-        }
-    )
+        },
+    ),
 );

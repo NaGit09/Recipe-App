@@ -17,6 +17,10 @@ A beautiful and dynamic recipe discovery mobile application built with React Nat
 - **Interactive Elements**:
   - Comment system with reply functionality.
   - Smooth staggered animations for lists and page transitions.
+- **Admin Dashboard**:
+  - **Overview**: Dashboard with key metrics (Users, Recipes, Orders, Ingredients).
+  - **Management Screens**: Dedicated screens for User, Recipe, Order, and Ingredient management.
+  - **Secure Access**: Protected admin routes.
 - **State Management**: Powered by Zustand for global state (Recipes, Ingredients, User).
 
 ## 🛠 Tech Stack
@@ -25,7 +29,7 @@ A beautiful and dynamic recipe discovery mobile application built with React Nat
 - **Language**: TypeScript
 - **Navigation**: Expo Router
 - **State Management**: Zustand
-- **Styling**: Custom CSS / Styles
+- **Styling**: React Native Paper + Custom CSS
 
 ## 🚀 Get Started
 
@@ -42,7 +46,6 @@ A beautiful and dynamic recipe discovery mobile application built with React Nat
    ```
 
    In the output, you'll find options to open the app in a:
-
    - Development build
    - Android emulator
    - iOS simulator
@@ -51,6 +54,7 @@ A beautiful and dynamic recipe discovery mobile application built with React Nat
 ## 📂 Project Structure
 
 - **app/**: Main application screens and routing.
+  - **admin/**: Admin specific screens and layouts.
 - **src/stores/**: Zustand state stores (e.g., `useRecipeStore`, `useIngredientStore`).
 - **src/components/**: Reusable UI components.
 - **src/constants/**: App constants and configuration.

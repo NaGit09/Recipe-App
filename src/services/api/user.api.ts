@@ -5,6 +5,10 @@ export const getUserProfile = async (): Promise<UserInfo> => {
   return await axiosInstance.get("/users/profile");
 };
 
+export const getAllUsers = async (): Promise<UserInfo[]> => {
+  return await axiosInstance.get("/users");
+};
+
 export const updateProfile = async (data: UserInfo): Promise<UserInfo> => {
   const formData = new FormData();
 

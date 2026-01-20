@@ -15,7 +15,7 @@ import { Button, Snackbar, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Login = () => {
-  const { login , loading } = useAuth();
+  const { login  , loading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,8 +40,12 @@ const Login = () => {
         password: password,
       };
       const success = await login(loginReq);
-
+      
+      if(success === "ADMIN") {
+        router.replace("/admin");
+      }
       if (success) {
+
         setSnackMessage("🎉 Login success!");
         setVisible(true);
         setTimeout(() => router.replace("/"), 500);

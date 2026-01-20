@@ -20,17 +20,25 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!isReady) return;
-    const checkFirstLaunch = async () => {
+
+    // Defer navigation to ensure layout is mounted
+    setTimeout(async () => {
       const isFirstLaunch = await StorageInstance.getItem("isFirstLaunch");
+      const { user } = useAuthStore.getState();
 
       if (isFirstLaunch === null) {
         router.replace("/welcome");
       } else if (!token) {
         router.replace("/login");
+      } else if (token && user?.role === "ADMIN") {
+        router.replace("/admin");
       }
-    };
-    checkFirstLaunch();
+    }, 100);
   }, [isReady, token]);
+
+  if (!isReady) {
+    return null; // Or a splash screen component
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -43,6 +51,7 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="admin" options={{ headerShown: false }} />
           <Stack.Screen name="login" />
           <Stack.Screen
             name="register"

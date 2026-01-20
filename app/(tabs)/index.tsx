@@ -24,10 +24,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const router = useRouter();
+
   const theme = useTheme();
+
   const [greeting, setGreeting] = useState("");
+
   const { user } = useAuthStore();
+
   const { categories, getAllCategories } = useCategoryStore();
+
   const {
     recipes,
     getAllRecipes,
@@ -36,13 +41,14 @@ export default function Index() {
     currentPage,
     hasMore,
   } = useRecipeStore();
+
   const { setActiveCategory, reset } = useSearchStore();
+  
   const { items: cartItems, fetchCart } = useCartStore();
 
   const username = user?.username || "Chef";
 
   const totalCartItems = cartItems.reduce((acc, recipeItem) => {
-    // Sum up quantities of all ingredients in each recipe added to cart
     return (
       acc +
       (recipeItem.items || []).reduce((sum, item) => sum + item.quantity, 0)
@@ -66,8 +72,11 @@ export default function Index() {
   }, []);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+
     const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+
     const paddingToBottom = 20;
+
     const isCloseToBottom =
       layoutMeasurement.height + contentOffset.y >=
       contentSize.height - paddingToBottom;
@@ -323,7 +332,7 @@ const styles = StyleSheet.create({
   recipesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingHorizontal: 16, // Reduced to balance with negative margins if needed
+    paddingHorizontal: 16,
   },
   loadingContainer: {
     padding: 40,

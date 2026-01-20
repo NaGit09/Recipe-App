@@ -5,6 +5,7 @@ import OrderSummary from "@/src/components/Checkout/OrderSummary";
 import PaymentMethod from "@/src/components/Checkout/PaymentMethod";
 import { useAuthStore } from "@/src/stores/auth.store";
 import { useCartStore } from "@/src/stores/cart.store";
+import { useOrderStore } from "@/src/stores/order.store";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -32,6 +33,7 @@ const CheckoutContent = () => {
   const theme = useTheme();
   const { items, clearCart } = useCartStore();
   const { user } = useAuthStore();
+  const { createOrder } = useOrderStore(); // Import order store
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const [address, setAddress] = useState("123 Recipe Street, Food City");
@@ -42,41 +44,82 @@ const CheckoutContent = () => {
 
   const handlePayment = async () => {
     if (items.length === 0) return;
-    setLoading(true);
 
-    if (paymentMethod === "cod") {
-      setTimeout(() => {
-        setLoading(false);
-        Alert.alert("Success", "Order placed successfully! Pay on delivery.", [
-          {
-            text: "OK",
-            onPress: () => {
-              clearCart();
-              router.replace("/(tabs)");
-            },
-          },
-        ]);
-      }, 1500);
+    if (!user?.id) {
+      Alert.alert("Error", "You must be logged in to place an order.");
       return;
     }
 
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert(
-        "Stripe Demo",
-        "This is a demo. In a real app, the Stripe Payment Sheet would open now.",
-        [
-          {
-            text: "Simulate Success",
-            onPress: () => {
+    setLoading(true);
+
+    const orderData = {
+      userId: user.id,
+      paymentMethod: paymentMethod === "cod" ? "COD" : "CREDIT_CARD",
+      orderStatus: "PENDING", // Default to pending, update if payment succeeds
+      totalPrice: parseFloat(totalAmount),
+      items: items.map((cartItem) => ({
+        recipeId: cartItem.recipe.id,
+        ingredients: (cartItem.items || []).map((ing) => ({
+          ingredientId: ing.ingredient.id,
+          quantity: ing.quantity,
+        })),
+      })),
+    };
+
+    if (paymentMethod === "cod") {
+      try {
+        const success = await createOrder(orderData);
+        setLoading(false);
+        if (success) {
+          Alert.alert(
+            "Success",
+            "Order placed successfully! Pay on delivery.",
+            [
+              {
+                text: "OK",
+                onPress: () => {
+                  clearCart();
+                  router.replace("/(tabs)");
+                },
+              },
+            ],
+          );
+        } else {
+          Alert.alert("Error", "Failed to place order. Please try again.");
+        }
+      } catch (error) {
+        setLoading(false);
+        Alert.alert("Error", "An unexpected error occurred.");
+      }
+      return;
+    }
+
+    // Stripe Mock
+    setLoading(false); // Pause loading while user interacts with alert
+    Alert.alert(
+      "Stripe Demo",
+      "This is a demo. In a real app, the Stripe Payment Sheet would open now.",
+      [
+        {
+          text: "Simulate Success",
+          onPress: async () => {
+            setLoading(true);
+            const success = await createOrder({
+              ...orderData,
+              orderStatus: "SUCCESS",
+            }); // Assume paid
+            setLoading(false);
+            if (success) {
               clearCart();
               router.replace("/(tabs)");
-            },
+            } else {
+              Alert.alert("Error", "Failed to create order on server.");
+            }
           },
-          { text: "Cancel", style: "cancel" },
-        ]
-      );
-    }, 1000);
+        },
+        { text: "Cancel", style: "cancel" },
+      ],
+    );
   };
 
   return (

@@ -6,7 +6,7 @@ export interface AuthState {
   isLoading: boolean;
   setAuth: (user: UserInfo, token: string) => Promise<void>;
   register: (dto: RegisterReq) => Promise<boolean>;
-  login: (dto: LoginReq) => Promise<boolean>;
+  login: (dto: LoginReq) => Promise<string>;
   logout: () => Promise<boolean>;
 }
 

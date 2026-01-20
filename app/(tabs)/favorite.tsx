@@ -1,7 +1,7 @@
 import RecipeCard from "@/src/components/Recipe/RecipeCard";
 import { useRecipeStore } from "@/src/stores/recipe.store";
 import { Feather } from "@expo/vector-icons";
-import React, { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -14,9 +14,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function FavoriteScreen() {
   const theme = useTheme();
+  
   const { favoriteRecipes, getMyFavoriteRecipes, loading } = useRecipeStore();
 
-  React.useEffect(() => {
+  useEffect(() => {
     getMyFavoriteRecipes();
   }, []);
 
