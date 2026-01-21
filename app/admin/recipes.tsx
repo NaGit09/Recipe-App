@@ -15,7 +15,7 @@ export default function RecipeManagementScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
 
   useEffect(() => {
-    getAllRecipes(0, 20); // Fetch first page
+    getAllRecipes(0, 20);
   }, []);
 
   const onChangeSearch = (query: string) => setSearchQuery(query);

@@ -9,6 +9,7 @@ import { useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Search = () => {
+  
   const { getAllRecipes, getRecipesByCategoryId } = useRecipeStore();
   const { getAllCategories } = useCategoryStore();
   const { activeCategory } = useSearchStore();

@@ -1,7 +1,7 @@
 import RecipeCard from "@/src/components/Recipe/RecipeCard";
 import { useRecipeStore } from "@/src/stores/recipe.store";
 import { Feather } from "@expo/vector-icons";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -9,36 +9,96 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { Appbar, Text, useTheme } from "react-native-paper";
+import { SegmentedButtons, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function FavoriteScreen() {
+
   const theme = useTheme();
-  
-  const { favoriteRecipes, getMyFavoriteRecipes, loading } = useRecipeStore();
 
+  const {
+    favoriteRecipes,
+    myRecipes,
+    getMyFavoriteRecipes,
+    getMyRecipes,
+    loading,
+  } = useRecipeStore();
+
+  const [viewMode, setViewMode] = useState<"favorites" | "my_recipes">(
+    "favorites",
+  );
+
+  // Fetch data by view mode
+  const fetchData = useCallback(() => {
+    if (viewMode === "favorites") {
+      getMyFavoriteRecipes();
+    } else {
+      getMyRecipes();
+    }
+  }, [viewMode, getMyFavoriteRecipes, getMyRecipes]);
+
+  // Fetch data
   useEffect(() => {
-    getMyFavoriteRecipes();
-  }, []);
+    fetchData();
+  }, [fetchData]);
 
+  // Refresh data
   const onRefresh = useCallback(() => {
-    getMyFavoriteRecipes();
-  }, [getMyFavoriteRecipes]);
+    fetchData();
+  }, [fetchData]);
+
+  const data = viewMode === "favorites" ? favoriteRecipes : myRecipes;
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       edges={["top", "left", "right"]}
     >
-      <Appbar.Header
-        mode="center-aligned"
-        style={{ backgroundColor: theme.colors.background }}
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: theme.colors.surface,
+            borderBottomColor: theme.colors.outlineVariant,
+          },
+        ]}
       >
-        <Appbar.Content title="Favorite Recipes" />
-      </Appbar.Header>
+        <Text
+          variant="headlineMedium"
+          style={[styles.headerTitle, { color: theme.colors.onSurface }]}
+        >
+          My Library
+        </Text>
+      </View>
+
+      <View style={styles.segmentContainer}>
+        <SegmentedButtons
+          value={viewMode}
+          onValueChange={(value) =>
+            setViewMode(value as "favorites" | "my_recipes")
+          }
+          buttons={[
+            {
+              value: "favorites",
+              label: "Favorites",
+              icon: "heart",
+              showSelectedCheck: true,
+              style: viewMode === "favorites" ? styles.activeSegment : null,
+            },
+            {
+              value: "my_recipes",
+              label: "My Recipes",
+              icon: "chef-hat",
+              showSelectedCheck: true,
+              style: viewMode === "my_recipes" ? styles.activeSegment : null,
+            },
+          ]}
+          style={styles.segmentedButtons}
+        />
+      </View>
 
       <FlatList
-        data={favoriteRecipes}
+        data={data}
         renderItem={({ item, index }) => (
           <RecipeCard index={index} item={item} />
         )}
@@ -56,19 +116,34 @@ export default function FavoriteScreen() {
         ListEmptyComponent={
           !loading ? (
             <View style={styles.emptyContainer}>
-              <Feather name="heart" size={48} color={theme.colors.outline} />
+              <View
+                style={[
+                  styles.emptyIconContainer,
+                  { backgroundColor: theme.colors.secondaryContainer },
+                ]}
+              >
+                <Feather
+                  name={viewMode === "favorites" ? "heart" : "book-open"}
+                  size={48}
+                  color={theme.colors.onSecondaryContainer}
+                />
+              </View>
+              <Text
+                style={[styles.emptyText, { color: theme.colors.onSurface }]}
+              >
+                {viewMode === "favorites"
+                  ? "No Favorites Yet"
+                  : "No Recipes Yet"}
+              </Text>
               <Text
                 style={[
-                  styles.emptyText,
+                  styles.emptySubtext,
                   { color: theme.colors.onSurfaceVariant },
                 ]}
               >
-                No favorite recipes yet
-              </Text>
-              <Text
-                style={[styles.emptySubtext, { color: theme.colors.outline }]}
-              >
-                Mark recipes as favorite to see them here
+                {viewMode === "favorites"
+                  ? "Start exploring and save your favorite recipes here!"
+                  : "Unleash your inner chef and create your first recipe!"}
               </Text>
             </View>
           ) : (
@@ -79,6 +154,7 @@ export default function FavoriteScreen() {
         }
         showsVerticalScrollIndicator={false}
       />
+      
     </SafeAreaView>
   );
 }
@@ -87,9 +163,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  headerTitle: {
+    fontWeight: "bold",
+  },
+  segmentContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+  },
+  segmentedButtons: {
+    borderRadius: 8,
+  },
+  activeSegment: {
+    // Optional: add specific styles for active segment if needed
+  },
   listContent: {
-    paddingBottom: 20,
-    paddingTop: 10,
+    paddingBottom: 24,
   },
   columnWrapper: {
     justifyContent: "space-between",
@@ -97,22 +190,33 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   loadingContainer: {
-    padding: 40,
+    padding: 60,
     alignItems: "center",
   },
   emptyContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 100,
+    paddingTop: 80,
+    paddingHorizontal: 32,
+  },
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 20,
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center",
   },
   emptySubtext: {
-    fontSize: 14,
-    marginTop: 8,
+    fontSize: 15,
+    textAlign: "center",
+    lineHeight: 22,
   },
 });

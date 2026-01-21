@@ -7,8 +7,8 @@ import { useTheme } from "react-native-paper";
 
 export default function TabsLayout() {
   const theme = useTheme();
-  const router = useRouter(); // Initialize router
-  const { user } = useAuthStore(); // Check user role
+  const router = useRouter();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     if (user?.role === "ADMIN") {

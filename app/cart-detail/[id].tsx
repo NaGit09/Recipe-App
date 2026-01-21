@@ -17,6 +17,7 @@ import { ActivityIndicator, Surface, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CartDetailScreen() {
+
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuthStore();
@@ -94,6 +95,7 @@ export default function CartDetailScreen() {
     );
   };
 
+  // if loading, return loading screen
   if (loading) {
     return (
       <SafeAreaView
@@ -107,6 +109,7 @@ export default function CartDetailScreen() {
     );
   }
 
+  // if error, cartDetail is null, or cartDetail.items is empty, return error
   if (
     error ||
     !cartDetail ||
@@ -147,9 +150,8 @@ export default function CartDetailScreen() {
     );
   }
 
-  // cartDetail is CartItemDetail, so we access properties directly
   const { recipe, items: ingredients } = cartDetail;
-
+  //  if recipe is null, return error
   if (!recipe) {
     return (
       <SafeAreaView
@@ -331,6 +333,7 @@ export default function CartDetailScreen() {
         <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
           Instructions
         </Text>
+
         <Surface
           style={[
             styles.instructionCard,
@@ -383,6 +386,7 @@ export default function CartDetailScreen() {
             Remove from Cart
           </Text>
         </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );

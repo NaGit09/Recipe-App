@@ -13,6 +13,8 @@ import {
 import { Button, Snackbar, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useSnackbar } from "@/src/hooks/useSnackbar";
+
 const Register = () => {
   const { register, loading } = useAuth();
   const router = useRouter();
@@ -20,25 +22,20 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [visible, setVisible] = useState(false);
-  const [snackMessage, setSnackMessage] = useState("");
+
+  const { visible, message, showSnackbar, hideSnackbar } = useSnackbar();
   const [secure, setSecure] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
-
-  // Display toast message
-  const onDismissSnackBar = () => setVisible(false);
 
   // Handle register
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword || !username) {
-      setSnackMessage("Please fill in all fields");
-      setVisible(true);
+      showSnackbar("Please fill in all fields");
       return;
     }
 
     if (password !== confirmPassword) {
-      setSnackMessage("Passwords do not match");
-      setVisible(true);
+      showSnackbar("Passwords do not match");
       return;
     }
 
@@ -50,17 +47,14 @@ const Register = () => {
       };
       const success = await register(registerReq);
       if (success) {
-        setSnackMessage("🎉 Account created successfully!");
-        setVisible(true);
+        showSnackbar("🎉 Account created successfully!");
         setTimeout(() => router.replace("/login"), 1500);
       } else {
-        setSnackMessage("Registration failed. Please try again.");
-        setVisible(true);
+        showSnackbar("Registration failed. Please try again.");
       }
     } catch (error) {
       console.error(error);
-      setSnackMessage("An error occurred. Please try again later.");
-      setVisible(true);
+      showSnackbar("An error occurred. Please try again later.");
     }
   };
 
@@ -183,16 +177,16 @@ const Register = () => {
 
         <Snackbar
           visible={visible}
-          onDismiss={onDismissSnackBar}
+          onDismiss={hideSnackbar}
           duration={3000}
           style={{ backgroundColor: "#1F2937" }}
           action={{
             label: "Close",
-            onPress: () => setVisible(false),
+            onPress: hideSnackbar,
             color: "#F87171",
           }}
         >
-          {snackMessage}
+          {message}
         </Snackbar>
       </KeyboardAvoidingView>
     </SafeAreaView>

@@ -1,3 +1,4 @@
+import { useLocalSearch } from "@/src/hooks/useLocalSearch";
 import { useUserStore } from "@/src/stores/user.store";
 import { UserInfo } from "@/src/types/user.type";
 import React, { useEffect, useState } from "react";
@@ -17,27 +18,22 @@ import UserItem from "./components/UserItem";
 
 export default function UserManagementScreen() {
   const theme = useTheme();
-  const [searchQuery, setSearchQuery] = useState("");
   const { users, getAllUsers } = useUserStore();
-  const [filteredUsers, setFilteredUsers] = useState<UserInfo[]>([]);
 
   useEffect(() => {
     getAllUsers();
   }, []);
 
-  useEffect(() => {
-    if (searchQuery) {
-      setFilteredUsers(
-        users.filter(
-          (u) =>
-            u.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            u.email?.toLowerCase().includes(searchQuery.toLowerCase()),
-        ),
-      );
-    } else {
-      setFilteredUsers(users);
-    }
-  }, [searchQuery, users]);
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredData: filteredUsers,
+  } = useLocalSearch(
+    users,
+    (u, query) =>
+      (u.username?.toLowerCase() || "").includes(query.toLowerCase()) ||
+      (u.email?.toLowerCase() || "").includes(query.toLowerCase()),
+  );
 
   // Edit/Add Modal State
   const [visible, setVisible] = useState(false);
@@ -71,10 +67,6 @@ export default function UserManagementScreen() {
     hideDialog();
   };
 
-  const onChangeSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-
   const renderUserItem = ({ item }: { item: UserInfo }) => (
     <UserItem
       item={item}
@@ -89,7 +81,7 @@ export default function UserManagementScreen() {
     >
       <Searchbar
         placeholder="Search users"
-        onChangeText={onChangeSearch}
+        onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchBar}
       />

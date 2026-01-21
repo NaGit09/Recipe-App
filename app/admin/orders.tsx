@@ -47,30 +47,27 @@ const MOCK_ORDERS = [
   },
 ];
 
+import { useLocalSearch } from "@/src/hooks/useLocalSearch";
+
 export default function OrderManagementScreen() {
   const theme = useTheme();
-  const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("ALL");
-  const [orders, setOrders] = React.useState(MOCK_ORDERS);
 
-  React.useEffect(() => {
-    let filtered = MOCK_ORDERS;
+  const statusFilteredOrders = React.useMemo(() => {
+    if (statusFilter === "ALL") return MOCK_ORDERS;
+    return MOCK_ORDERS.filter((o) => o.status === statusFilter);
+  }, [statusFilter]);
 
-    if (statusFilter !== "ALL") {
-      filtered = filtered.filter((o) => o.status === statusFilter);
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (o) =>
-          o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          o.customer.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
-    setOrders(filtered);
-  }, [searchQuery, statusFilter]);
-
-  const onChangeSearch = (query: string) => setSearchQuery(query);
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredData: orders,
+  } = useLocalSearch(
+    statusFilteredOrders,
+    (o, query) =>
+      o.id.toLowerCase().includes(query.toLowerCase()) ||
+      o.customer.toLowerCase().includes(query.toLowerCase()),
+  );
 
   const renderOrderItem = ({ item }: { item: (typeof MOCK_ORDERS)[0] }) => {
     return (
@@ -84,7 +81,7 @@ export default function OrderManagementScreen() {
     >
       <Searchbar
         placeholder="Search orders"
-        onChangeText={onChangeSearch}
+        onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchBar}
       />

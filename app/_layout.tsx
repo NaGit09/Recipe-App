@@ -21,7 +21,6 @@ export default function RootLayout() {
   useEffect(() => {
     if (!isReady) return;
 
-    // Defer navigation to ensure layout is mounted
     setTimeout(async () => {
       const isFirstLaunch = await StorageInstance.getItem("isFirstLaunch");
       const { user } = useAuthStore.getState();
@@ -37,7 +36,7 @@ export default function RootLayout() {
   }, [isReady, token]);
 
   if (!isReady) {
-    return null; // Or a splash screen component
+    return null;
   }
 
   return (
@@ -47,7 +46,7 @@ export default function RootLayout() {
           screenOptions={{
             headerShown: false,
             animation: "slide_from_right",
-            contentStyle: { backgroundColor: theme.colors.background }, // Use dynamic, theme-aware background
+            contentStyle: { backgroundColor: theme.colors.background },
           }}
         >
           <Stack.Screen name="(tabs)" />

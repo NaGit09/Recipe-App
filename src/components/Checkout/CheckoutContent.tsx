@@ -19,7 +19,6 @@ const calculateTotal = (items: any[]) => {
   items.forEach((group) => {
     if (group?.items && Array.isArray(group.items)) {
       group.items.forEach((item: any) => {
-        // item matches { ingredient: { price: ... }, quantity: ... }
         const price = item.ingredient?.price || item.price || 2.5;
         total += price * item.quantity;
       });
@@ -33,8 +32,7 @@ const CheckoutContent = () => {
   const theme = useTheme();
   const { items, clearCart } = useCartStore();
   const { user } = useAuthStore();
-  const { createOrder } = useOrderStore(); // Import order store
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { createOrder } = useOrderStore();  
 
   const [address, setAddress] = useState("123 Recipe Street, Food City");
   const [paymentMethod, setPaymentMethod] = useState("stripe");
@@ -42,6 +40,7 @@ const CheckoutContent = () => {
 
   const totalAmount = calculateTotal(items);
 
+  // handle payment , mock order data and stripe payment
   const handlePayment = async () => {
     if (items.length === 0) return;
 
@@ -54,23 +53,15 @@ const CheckoutContent = () => {
 
     const orderData = {
       userId: user.id,
+      recipeId: items[0].recipe.id,
       paymentMethod: paymentMethod === "cod" ? "COD" : "CREDIT_CARD",
-      orderStatus: "PENDING", // Default to pending, update if payment succeeds
-      totalPrice: parseFloat(totalAmount),
-      items: items.map((cartItem) => ({
-        recipeId: cartItem.recipe.id,
-        ingredients: (cartItem.items || []).map((ing) => ({
-          ingredientId: ing.ingredient.id,
-          quantity: ing.quantity,
-        })),
-      })),
+      orderStatus: "PENDING",
     };
 
     if (paymentMethod === "cod") {
       try {
         const success = await createOrder(orderData);
         setLoading(false);
-        if (success) {
           Alert.alert(
             "Success",
             "Order placed successfully! Pay on delivery.",
@@ -84,9 +75,6 @@ const CheckoutContent = () => {
               },
             ],
           );
-        } else {
-          Alert.alert("Error", "Failed to place order. Please try again.");
-        }
       } catch (error) {
         setLoading(false);
         Alert.alert("Error", "An unexpected error occurred.");
@@ -94,8 +82,7 @@ const CheckoutContent = () => {
       return;
     }
 
-    // Stripe Mock
-    setLoading(false); // Pause loading while user interacts with alert
+    setLoading(false);
     Alert.alert(
       "Stripe Demo",
       "This is a demo. In a real app, the Stripe Payment Sheet would open now.",
@@ -104,10 +91,7 @@ const CheckoutContent = () => {
           text: "Simulate Success",
           onPress: async () => {
             setLoading(true);
-            const success = await createOrder({
-              ...orderData,
-              orderStatus: "SUCCESS",
-            }); // Assume paid
+            const success = await createOrder(orderData);
             setLoading(false);
             if (success) {
               clearCart();

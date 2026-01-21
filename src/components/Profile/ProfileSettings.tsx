@@ -1,8 +1,8 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Surface, useTheme } from "react-native-paper";
+import ProfileSettingItem from "./ProfileSettingItem";
 import { ThemeSelector } from "./ThemeSelector";
 
 const ProfileSettings = () => {
@@ -10,52 +10,6 @@ const ProfileSettings = () => {
   const [notifications, setNotifications] = useState(true);
   const [themeModalVisible, setThemeModalVisible] = useState(false);
   const theme = useTheme();
-
-  const renderSettingItem = (
-    icon: string,
-    label: string,
-    value: boolean,
-    onPress: () => void,
-    isSwitch: boolean = true,
-  ) => (
-    <TouchableOpacity
-      style={styles.settingItem}
-      onPress={isSwitch ? undefined : onPress}
-      disabled={isSwitch}
-    >
-      <View style={styles.settingLeft}>
-        <View
-          style={[
-            styles.iconContainer,
-            { backgroundColor: theme.colors.surfaceVariant },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name={icon as any}
-            size={20}
-            color={theme.colors.onSurfaceVariant}
-          />
-        </View>
-        <Text style={[styles.settingLabel, { color: theme.colors.onSurface }]}>
-          {label}
-        </Text>
-      </View>
-      {isSwitch ? (
-        <Switch
-          value={value}
-          onValueChange={onPress as any}
-          trackColor={{ false: "#D1D5DB", true: theme.colors.primary }}
-          thumbColor={value ? "#fff" : "#f4f3f4"}
-        />
-      ) : (
-        <MaterialCommunityIcons
-          name="chevron-right"
-          size={24}
-          color={theme.colors.onSurfaceDisabled}
-        />
-      )}
-    </TouchableOpacity>
-  );
 
   return (
     <View style={styles.container}>
@@ -67,49 +21,42 @@ const ProfileSettings = () => {
         elevation={1}
       >
         <View style={styles.cardContent}>
-          {renderSettingItem(
-            "bell-outline",
-            "Push Notifications",
-            notifications,
-            () => setNotifications(!notifications),
-          )}
+          <ProfileSettingItem
+            icon="bell-outline"
+            label="Push Notifications"
+            value={notifications}
+            onPress={() => setNotifications(!notifications)}
+            isSwitch={true}
+          />
           <View style={styles.divider} />
 
           {/* Favorites Entry */}
-          {renderSettingItem(
-            "heart-outline",
-            "Favorite Recipes",
-            false,
-            () => router.push("/favorite"),
-            false,
-          )}
+          <ProfileSettingItem
+            icon="heart-outline"
+            label="Favorite Recipes"
+            onPress={() => router.push("/favorite")}
+          />
           <View style={styles.divider} />
 
           {/* Theme Selector Entry */}
-          {renderSettingItem(
-            "palette-outline",
-            "App Theme",
-            false,
-            () => setThemeModalVisible(true),
-            false,
-          )}
+          <ProfileSettingItem
+            icon="palette-outline"
+            label="App Theme"
+            onPress={() => setThemeModalVisible(true)}
+          />
 
           <View style={styles.divider} />
-          {renderSettingItem(
-            "shield-check-outline",
-            "Privacy & Security",
-            false,
-            () => {},
-            false,
-          )}
+          <ProfileSettingItem
+            icon="shield-check-outline"
+            label="Privacy & Security"
+            onPress={() => {}}
+          />
           <View style={styles.divider} />
-          {renderSettingItem(
-            "help-circle-outline",
-            "Help & Support",
-            false,
-            () => {},
-            false,
-          )}
+          <ProfileSettingItem
+            icon="help-circle-outline"
+            label="Help & Support"
+            onPress={() => {}}
+          />
         </View>
       </Surface>
 
@@ -136,28 +83,6 @@ const styles = StyleSheet.create({
   cardContent: {
     borderRadius: 16,
     overflow: "hidden",
-  },
-  settingItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  settingLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  settingLabel: {
-    fontSize: 16,
-    fontWeight: "500",
   },
   divider: {
     height: 1,

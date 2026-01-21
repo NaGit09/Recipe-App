@@ -49,13 +49,15 @@ export default function CreateRecipeScreen() {
   // Ingredients State
   const [selectedIngredients, setSelectedIngredients] = useState<
     { ingredient: Ingredient; quantity: string }[]
-  >([]);
+    >([]);
+  
   const [ingredientModalVisible, setIngredientModalVisible] = useState(false);
 
   // Nutrition State
   const [selectedNutritions, setSelectedNutritions] = useState<
     { nutrition: Nutrition; value: string }[]
-  >([]);
+    >([]);
+  
   const [nutritionModalVisible, setNutritionModalVisible] = useState(false);
 
   useEffect(() => {
@@ -66,7 +68,7 @@ export default function CreateRecipeScreen() {
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -105,7 +107,7 @@ export default function CreateRecipeScreen() {
     if (selectedNutritions.some((n) => n.nutrition.id === nutrition.id)) {
       Alert.alert(
         "Already Added",
-        "This nutrition info is already in your list."
+        "This nutrition info is already in your list.",
       );
       return;
     }
@@ -129,15 +131,13 @@ export default function CreateRecipeScreen() {
     if (!name || !description || !categoryId || !time || !image) {
       Alert.alert(
         "Error",
-        "Please fill in all required fields (Name, Desc, Time, Category, Image)"
+        "Please fill in all required fields (Name, Desc, Time, Category, Image)",
       );
       return;
     }
 
     setLoading(true);
     try {
-      // Backend likely expects specific structure for ingredients/nutrition
-      // Assuming it expects arrays of objects with IDs and values
       const ingredientPayload = selectedIngredients.map((i) => ({
         ingredientId: i.ingredient.id,
         quantity: parseFloat(i.quantity) || 0,

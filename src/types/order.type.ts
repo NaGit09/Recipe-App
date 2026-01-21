@@ -34,11 +34,6 @@ export interface OrderRequest {
     recipeId?: string;
     paymentMethod: string;
     orderStatus: string;
-    totalPrice: number;
-    items: {
-        recipeId: string;
-        ingredients: { ingredientId: string; quantity: number }[];
-    }[];
 }
 
 export interface OrderState {

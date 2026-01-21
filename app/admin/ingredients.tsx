@@ -1,5 +1,5 @@
 import { useIngredientStore } from "@/src/stores/ingredient.store";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import {
   ActivityIndicator,
@@ -9,31 +9,24 @@ import {
 } from "react-native-paper";
 import IngredientItem from "./components/IngredientItem";
 
+import { useLocalSearch } from "@/src/hooks/useLocalSearch";
+
 export default function IngredientManagementScreen() {
   const theme = useTheme();
   const { ingredients, getAllIngredients, loading, deleteIngredient } =
     useIngredientStore();
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const [filteredIngredients, setFilteredIngredients] = useState<any[]>([]);
 
   useEffect(() => {
     getAllIngredients();
   }, []);
 
-  useEffect(() => {
-    if (searchQuery) {
-      setFilteredIngredients(
-        ingredients.filter((i) =>
-          i.name.toLowerCase().includes(searchQuery.toLowerCase()),
-        ),
-      );
-    } else {
-      setFilteredIngredients(ingredients);
-    }
-  }, [ingredients, searchQuery]);
-
-  const onChangeSearch = (query: string) => setSearchQuery(query);
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredData: filteredIngredients,
+  } = useLocalSearch(ingredients, (item, query) =>
+    item.name.toLowerCase().includes(query.toLowerCase()),
+  );
 
   const handleDelete = (id: string) => {
     deleteIngredient(id);
@@ -49,7 +42,7 @@ export default function IngredientManagementScreen() {
     >
       <Searchbar
         placeholder="Search ingredients"
-        onChangeText={onChangeSearch}
+        onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchBar}
       />

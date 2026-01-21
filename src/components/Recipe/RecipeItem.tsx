@@ -14,8 +14,9 @@ const RecipeItem = ({ item, index }: { item: Recipe; index: number }) => {
 
   const isFavorite = favoriteRecipes.some((fav) => fav.id === item.id);
 
-  const toggleFavorite = async () => {
-    if (isFavorite) {
+  const toggleFavorite = async (e: any) => {
+    e.stopPropagation();
+    if (!isFavorite) {
       await removeFavoriteRecipe(item.id);
     } else {
       await addFavoriteRecipe(item.id);
@@ -131,7 +132,8 @@ const styles = StyleSheet.create({
     right: 10,
     padding: 6,
     borderRadius: 20,
-    elevation: 2,
+    elevation: 5,
+    zIndex: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

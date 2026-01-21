@@ -12,8 +12,6 @@ import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -21,6 +19,8 @@ import {
 } from "react-native";
 import { ActivityIndicator, Badge, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useInfiniteScroll } from "@/src/hooks/useInfiniteScroll";
 
 export default function Index() {
   const router = useRouter();
@@ -43,7 +43,7 @@ export default function Index() {
   } = useRecipeStore();
 
   const { setActiveCategory, reset } = useSearchStore();
-  
+
   const { items: cartItems, fetchCart } = useCartStore();
 
   const username = user?.username || "Chef";
@@ -71,20 +71,11 @@ export default function Index() {
     else setGreeting("Good Evening");
   }, []);
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-
-    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-
-    const paddingToBottom = 20;
-
-    const isCloseToBottom =
-      layoutMeasurement.height + contentOffset.y >=
-      contentSize.height - paddingToBottom;
-
-    if (isCloseToBottom && hasMore && !recipesLoading) {
-      getAllRecipes(currentPage + 1, 10);
-    }
-  };
+  const { handleScroll } = useInfiniteScroll({
+    isLoading: recipesLoading,
+    hasMore,
+    onLoadMore: () => getAllRecipes(currentPage + 1, 10),
+  });
 
   const popularRecipes = recipes;
 
@@ -132,6 +123,7 @@ export default function Index() {
             {totalCartItems}
           </Badge>
         </TouchableOpacity>
+        
       </View>
 
       <ScrollView

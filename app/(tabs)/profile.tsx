@@ -10,6 +10,7 @@ import { Alert, ScrollView, StatusBar, StyleSheet, View } from "react-native";
 import { ActivityIndicator, Button, Text, useTheme } from "react-native-paper";
 
 const ProfileScreen = () => {
+
   const { user, getProfile, updateProfile } = useUserStore();
   const { logout } = useAuthStore();
   const theme = useTheme();
@@ -37,6 +38,7 @@ const ProfileScreen = () => {
   };
 
   const handleUpdate = async () => {
+
     if (!formData.username) {
       Alert.alert("Error", "Username cannot be empty");
       return;
@@ -146,13 +148,14 @@ const ProfileScreen = () => {
             </Button>
           </View>
         </View>
+        
       </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 }, // Background color handled dynamically
+  container: { flex: 1 },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",

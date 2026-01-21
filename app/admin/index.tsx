@@ -18,6 +18,7 @@ export default function AdminDashboard() {
     ingredients: 0,
     orders: 5,
   });
+
   const handleLogout = async () => {
     const { logout } =
       require("@/src/stores/auth.store").useAuthStore.getState();
@@ -131,6 +132,7 @@ export default function AdminDashboard() {
           </Card>
         ))}
       </View>
+      
     </ScrollView>
   );
 }

@@ -15,7 +15,6 @@ const ProfileCart = ({ formData, onAvatarChange }: ProfileCartProps) => {
   const theme = useTheme();
 
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
@@ -60,20 +59,21 @@ const ProfileCart = ({ formData, onAvatarChange }: ProfileCartProps) => {
           />
         </TouchableOpacity>
       </View>
-
+      {/* username */}
       <Text
         variant="titleLarge"
         style={[styles.username, { color: theme.colors.onSurface }]}
       >
         {formData.username || "User"}
       </Text>
+         {/* role */}
       <Text
         variant="bodyMedium"
         style={[styles.role, { color: theme.colors.secondary }]}
       >
         {formData.role || "Member"}
       </Text>
-
+      {/* stats */}
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: theme.colors.onSurface }]}>

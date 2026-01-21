@@ -11,8 +11,6 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         try {
             set({ isLoading: true, error: null });
             await createOrder(order);
-            // Optionally fetch orders if needed immediately
-            // await get().fetchOrders(order.userId);
             set({ isLoading: false });
             return true;
         } catch (error: any) {
@@ -29,9 +27,6 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         try {
             set({ isLoading: true, error: null });
             const response: any = await getOrdersByUserId(userId);
-            // Assuming response is the array of orders or has a property for it.
-            // Based on axiosInstance, response is apiResponse.result.
-            // Adjust if result is wrapped.
             set({
                 orders: Array.isArray(response) ? response : [],
                 isLoading: false,

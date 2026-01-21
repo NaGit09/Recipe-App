@@ -14,23 +14,22 @@ import {
 import { Button, Snackbar, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useSnackbar } from "@/src/hooks/useSnackbar";
+
 const Login = () => {
-  const { login  , loading } = useAuth();
+  const { login, loading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [visible, setVisible] = useState(false);
-  const [snackMessage, setSnackMessage] = useState("");
+
+  const { visible, message, showSnackbar, hideSnackbar } = useSnackbar();
   const [secure, setSecure] = useState(true);
 
-  const onDismissSnackBar = () => setVisible(false);
-
   const handleLogin = async () => {
-    await StorageInstance.removeItem("accessToken");
+    await StorageInstance.removeItem("token");
 
     if (!email || !password) {
-      setSnackMessage("Please enter both email and password");
-      setVisible(true);
+      showSnackbar("Please enter both email and password");
       return;
     }
 
@@ -40,22 +39,18 @@ const Login = () => {
         password: password,
       };
       const success = await login(loginReq);
-      
-      if(success === "ADMIN") {
+
+      if (success === "ADMIN") {
         router.replace("/admin");
       }
       if (success) {
-
-        setSnackMessage("🎉 Login success!");
-        setVisible(true);
+        showSnackbar("🎉 Login success!");
         setTimeout(() => router.replace("/"), 500);
       } else {
-        setSnackMessage("Invalid email or password");
-        setVisible(true);
+        showSnackbar("Invalid email or password");
       }
     } catch (error) {
-      setSnackMessage("Login failed. Please try again later.");
-      setVisible(true);
+      showSnackbar("Login failed. Please try again later.");
     }
   };
 
@@ -144,16 +139,16 @@ const Login = () => {
 
         <Snackbar
           visible={visible}
-          onDismiss={onDismissSnackBar}
+          onDismiss={hideSnackbar}
           duration={3000}
           style={{ backgroundColor: "#1F2937" }}
           action={{
             label: "Close",
-            onPress: () => setVisible(false),
+            onPress: hideSnackbar,
             color: "#F87171",
           }}
         >
-          {snackMessage}
+          {message}
         </Snackbar>
       </KeyboardAvoidingView>
     </SafeAreaView>
